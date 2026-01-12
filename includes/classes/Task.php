@@ -187,7 +187,9 @@ class Task {
                 bonus_xp, penalty_xp, completed_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             $db->execute($sql, [
-                $this->id, $userId, $finalXP, $method, $wasEarly, $wasLate, $bonusXP, $penaltyXP
+                $this->id, $userId, $finalXP, $method, 
+                $wasEarly ? 1 : 0, $wasLate ? 1 : 0, 
+                $bonusXP, $penaltyXP
             ]);
             
             // Award XP to user
