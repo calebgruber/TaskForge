@@ -4,6 +4,13 @@
     Deny from all
 </FilesMatch>
 
+# Protect install.php - use with caution
+# Uncomment to block access after initial setup
+# <Files "install.php">
+#     Order allow,deny
+#     Deny from all
+# </Files>
+
 # Prevent directory browsing
 Options -Indexes
 

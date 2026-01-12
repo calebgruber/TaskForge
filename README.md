@@ -14,6 +14,7 @@ TaskForge is a tactile, game-style productivity system that combines **physical 
 - **SMS Reminders**: Optional text alerts for upcoming and overdue tasks
 - **Admin Dashboard**: Manage templates, icons, categories, and XP rules
 - **Beautiful UI**: Built with Tabler for a clean, modern interface
+- **Auto-Update System**: Built-in updater pulls latest code from GitHub repository
 
 ### 🖥️ Technology Stack
 
@@ -69,6 +70,29 @@ TaskForge is a tactile, game-style productivity system that combines **physical 
    - Start creating tasks!
 
 ### 🔧 Configuration
+
+#### Auto-Update System
+
+TaskForge includes a built-in auto-update system:
+
+1. **Set Repository Public**: Go to GitHub repo settings and make it public
+2. **Access Update Panel**: Visit `https://yourdomain.com/install.php`
+3. **Enter Password**: Use the password defined in `config/config.php` as `INSTALL_PASSWORD`
+4. **Update**: Click "Perform Update" to pull latest code from GitHub
+
+**What gets updated:**
+- All PHP code files
+- Admin panel features
+- Database schema (run manually if needed)
+- UI improvements
+
+**What's preserved:**
+- Your database data
+- Uploaded icons and files
+- Configuration settings
+- User accounts and tasks
+
+**Security**: Change `INSTALL_PASSWORD` in config.php before first use!
 
 #### Printer Setup (USB)
 
@@ -154,9 +178,26 @@ View your rewards, progress, and stats in the responsive web app. Access from an
 - Session management with secure cookies
 - Input validation and sanitization
 
-### 🛠️ Troubleshooting
+## Troubleshooting
 
-**Printer not working?**
+### Auto-Update Issues
+
+**"Failed to download repository"**
+- Ensure repository is set to PUBLIC on GitHub
+- Check internet connection on server
+- Verify repository owner/name in config.php
+
+**"Could not extract ZIP file"**
+- Check PHP has ZipArchive extension enabled
+- Verify write permissions on server
+- Check available disk space
+
+**Update completed but site broken**
+- Restore from automatic backup in `/backup_[date]` folder
+- Check if new database updates are needed
+- Verify config.php was restored correctly
+
+### Printer not working?
 - Check USB connection or network settings
 - Verify printer device path (`/dev/usb/lp0`)
 - Test with: `echo "test" > /dev/usb/lp0`

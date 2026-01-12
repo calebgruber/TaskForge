@@ -32,10 +32,16 @@ define('PUBLIC_PATH', BASE_PATH . '/public');
 define('INCLUDES_PATH', BASE_PATH . '/includes');
 define('UPLOAD_PATH', PUBLIC_PATH . '/uploads');
 
+// GitHub Repository Configuration
+define('GITHUB_REPO_OWNER', 'calebgruber');
+define('GITHUB_REPO_NAME', 'TaskForge');
+define('GITHUB_BRANCH', 'copilot/add-barcode-scanning-rewards');
+
 // Security
 define('SESSION_LIFETIME', 86400); // 24 hours
 define('PASSWORD_MIN_LENGTH', 8);
 define('MAX_LOGIN_ATTEMPTS', 5);
+define('INSTALL_PASSWORD', 'TaskForge2024!Install'); // Change this password!
 
 // Printer Configuration
 define('PRINTER_ENABLED', true);
