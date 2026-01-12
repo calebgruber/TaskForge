@@ -16,6 +16,10 @@ class Database {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             $this->conn = new PDO($dsn, DB_USER, DB_PASS, $options);
+            
+            // Set MySQL timezone to Eastern Time (US)
+            // This ensures all database timestamps use Eastern Time
+            $this->conn->exec("SET time_zone = '-05:00'");
         } catch (PDOException $e) {
             error_log("Database Connection Error: " . $e->getMessage());
             die("Database connection failed. Please check configuration.");

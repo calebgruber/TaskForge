@@ -1,6 +1,9 @@
 -- TaskForge Database Schema
 -- Full physical-digital productivity engine with barcode scanning and thermal printing
 
+-- Set timezone to Eastern Time (US)
+SET time_zone = '-05:00';
+
 -- Users table with XP and leveling system
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,

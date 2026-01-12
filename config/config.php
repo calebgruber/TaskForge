@@ -13,8 +13,13 @@ if (session_status() === PHP_SESSION_NONE) {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Timezone
+// Timezone - Eastern Time (US)
 date_default_timezone_set('America/New_York');
+
+// Note: The system uses US Eastern Time (America/New_York) for all operations
+// This timezone automatically handles DST (Daylight Saving Time) transitions
+// - EST: UTC-5 (November to March)
+// - EDT: UTC-4 (March to November)
 
 // Database Configuration
 define('DB_HOST', 'localhost');

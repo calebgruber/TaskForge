@@ -92,6 +92,8 @@ chmod 644 config/config.php
 3. Click **Sign up** to create your first account
 4. Fill in registration form and create account
 
+**Verify Timezone**: Visit `https://yourdomain.com/timezone-check.php` to verify the system is using US Eastern Time correctly.
+
 ### Step 8: Configure Hardware (Optional)
 
 #### Thermal Printer Setup
@@ -178,6 +180,12 @@ If using Network/Ethernet printer:
 - Check session.save_path in php.ini
 - Verify /tmp directory is writable
 - Clear browser cookies and try again
+
+### Timezone Issues
+- Visit `/timezone-check.php` to verify configuration
+- System should show US Eastern Time (America/New_York)
+- Both PHP and MySQL should match
+- Check config/config.php timezone setting
 
 ## Advanced Configuration
 

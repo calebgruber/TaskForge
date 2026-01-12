@@ -35,6 +35,8 @@ TaskForge is a tactile, game-style productivity system that combines **physical 
 - Zebra DS81XX-HC barcode scanner (optional)
 - ESC/POS thermal printer (optional)
 
+**Note**: System uses US Eastern Time (America/New_York) for all timestamps and automatically handles Daylight Saving Time.
+
 #### Setup Instructions
 
 1. **Upload files to cPanel**
