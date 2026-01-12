@@ -11,6 +11,23 @@ include 'includes/header.php';
 <!-- Canvas Confetti Library -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
+<!-- HTML5 QR Code / Barcode Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+#cameraReader {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+#cameraReader video {
+    border-radius: 8px;
+}
+.camera-controls {
+    margin-top: 15px;
+}
+</style>
+
 <div class="page-body">
     <div class="container-xl">
         <div class="row justify-content-center">
@@ -22,7 +39,22 @@ include 'includes/header.php';
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info">
+                        <!-- Scanner Mode Toggle -->
+                        <div class="mb-3">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="scannerMode" id="modeKeyboard" checked autocomplete="off">
+                                <label class="btn btn-outline-primary" for="modeKeyboard">
+                                    <i class="ti ti-keyboard"></i> Keyboard Scanner
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="scannerMode" id="modeCamera" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="modeCamera">
+                                    <i class="ti ti-camera"></i> Camera Scanner
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info" id="infoKeyboard">
                             <div class="d-flex">
                                 <div><i class="ti ti-info-circle"></i></div>
                                 <div class="ms-2">
@@ -35,31 +67,59 @@ include 'includes/header.php';
                             </div>
                         </div>
                         
-                        <div class="mb-4 text-center">
-                            <div class="scanner-ready barcode-display py-5" id="scannerStatus">
-                                <i class="ti ti-scan" style="font-size: 4rem;"></i>
-                                <div class="h3 mt-3">Ready to scan</div>
-                                <div class="text-muted">Point scanner at task barcode</div>
+                        <div class="alert alert-info" id="infoCamera" style="display: none;">
+                            <div class="d-flex">
+                                <div><i class="ti ti-info-circle"></i></div>
+                                <div class="ms-2">
+                                    <h4 class="alert-title">Camera Scanner</h4>
+                                    <div class="text-muted">
+                                        Point your phone camera at the task barcode. The scanner will detect and process it automatically.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <form id="scannerForm">
-                            <div class="mb-3">
-                                <label class="form-label">Barcode Input</label>
-                                <input type="text" 
-                                       id="barcodeInput" 
-                                       name="barcode" 
-                                       class="form-control form-control-lg" 
-                                       placeholder="Focus here and scan barcode"
-                                       autocomplete="off"
-                                       autofocus>
-                                <small class="form-hint">Scanner will automatically input here</small>
+                        <!-- Keyboard Scanner Section -->
+                        <div id="keyboardScanner">
+                            <div class="mb-4 text-center">
+                                <div class="scanner-ready barcode-display py-5" id="scannerStatus">
+                                    <i class="ti ti-scan" style="font-size: 4rem;"></i>
+                                    <div class="h3 mt-3">Ready to scan</div>
+                                    <div class="text-muted">Point scanner at task barcode</div>
+                                </div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="ti ti-check"></i> Complete Task Manually
-                            </button>
-                        </form>
+                            <form id="scannerForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Barcode Input</label>
+                                    <input type="text" 
+                                           id="barcodeInput" 
+                                           name="barcode" 
+                                           class="form-control form-control-lg" 
+                                           placeholder="Focus here and scan barcode"
+                                           autocomplete="off"
+                                           autofocus>
+                                    <small class="form-hint">Scanner will automatically input here</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ti ti-check"></i> Complete Task Manually
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Camera Scanner Section -->
+                        <div id="cameraScanner" style="display: none;">
+                            <div id="cameraReader"></div>
+                            <div class="camera-controls text-center">
+                                <button type="button" class="btn btn-success" id="startCamera">
+                                    <i class="ti ti-camera"></i> Start Camera
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stopCamera" style="display: none;">
+                                    <i class="ti ti-camera-off"></i> Stop Camera
+                                </button>
+                            </div>
+                        </div>
                         
                         <div id="resultContainer" class="mt-4"></div>
                     </div>
@@ -87,16 +147,120 @@ const scannerForm = document.getElementById('scannerForm');
 const resultContainer = document.getElementById('resultContainer');
 const recentScans = document.getElementById('recentScans');
 
-let scanHistory = [];
+// Scanner mode elements
+const modeKeyboard = document.getElementById('modeKeyboard');
+const modeCamera = document.getElementById('modeCamera');
+const keyboardScanner = document.getElementById('keyboardScanner');
+const cameraScanner = document.getElementById('cameraScanner');
+const infoKeyboard = document.getElementById('infoKeyboard');
+const infoCamera = document.getElementById('infoCamera');
+const startCameraBtn = document.getElementById('startCamera');
+const stopCameraBtn = document.getElementById('stopCamera');
 
-// Auto-focus input field
+let scanHistory = [];
+let html5QrCode = null;
+let isCameraActive = false;
+
+// Scanner mode toggle
+modeKeyboard.addEventListener('change', () => {
+    if (modeKeyboard.checked) {
+        keyboardScanner.style.display = 'block';
+        cameraScanner.style.display = 'none';
+        infoKeyboard.style.display = 'block';
+        infoCamera.style.display = 'none';
+        stopCameraScanner();
+        barcodeInput.focus();
+    }
+});
+
+modeCamera.addEventListener('change', () => {
+    if (modeCamera.checked) {
+        keyboardScanner.style.display = 'none';
+        cameraScanner.style.display = 'block';
+        infoKeyboard.style.display = 'none';
+        infoCamera.style.display = 'block';
+    }
+});
+
+// Camera scanner functions
+startCameraBtn.addEventListener('click', async () => {
+    try {
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("cameraReader");
+        }
+        
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
+        };
+        
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            onScanError
+        );
+        
+        isCameraActive = true;
+        startCameraBtn.style.display = 'none';
+        stopCameraBtn.style.display = 'inline-block';
+    } catch (err) {
+        showResult(`
+            <div class="alert alert-danger">
+                <h4 class="alert-title">
+                    <i class="ti ti-alert-circle"></i> Camera Error
+                </h4>
+                <div>Failed to start camera: ${err.message || err}</div>
+                <div class="small mt-2">Make sure to allow camera permissions in your browser.</div>
+            </div>
+        `, 'danger');
+    }
+});
+
+stopCameraBtn.addEventListener('click', () => {
+    stopCameraScanner();
+});
+
+function stopCameraScanner() {
+    if (html5QrCode && isCameraActive) {
+        html5QrCode.stop().then(() => {
+            isCameraActive = false;
+            startCameraBtn.style.display = 'inline-block';
+            stopCameraBtn.style.display = 'none';
+        }).catch(err => {
+            console.error('Error stopping camera:', err);
+        });
+    }
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+    // Process the scanned barcode
+    processBarcode(decodedText);
+    
+    // Optional: Stop camera after successful scan
+    // stopCameraScanner();
+}
+
+function onScanError(errorMessage) {
+    // Handle scan errors silently (too many errors otherwise)
+    // console.warn('Scan error:', errorMessage);
+}
+
+// Auto-focus input field (keyboard scanner mode only)
 setInterval(() => {
-    if (document.activeElement !== barcodeInput) {
+    if (modeKeyboard.checked && document.activeElement !== barcodeInput) {
         barcodeInput.focus();
     }
 }, 1000);
 
-// Handle form submission (both manual and scanner)
+// Handle form submission (keyboard scanner)
 scannerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -109,6 +273,10 @@ scannerForm.addEventListener('submit', async (e) => {
     // Clear input for next scan
     barcodeInput.value = '';
     
+    await processBarcode(barcode);
+});
+
+async function processBarcode(barcode) {
     try {
         const response = await fetch('/api/scan.php', {
             method: 'POST',
@@ -170,7 +338,7 @@ scannerForm.addEventListener('submit', async (e) => {
             </div>
         `, 'danger');
     }
-});
+}
 
 function showResult(html, type) {
     resultContainer.innerHTML = html;
