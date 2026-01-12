@@ -1,0 +1,218 @@
+<?php
+require_once __DIR__ . '/../config/config.php';
+requireAdmin();
+
+$pageTitle = 'Settings';
+$db = Database::getInstance();
+
+$message = '';
+$error = '';
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // Printer settings
+        setSetting('printer_enabled', isset($_POST['printer_enabled']) ? '1' : '0', 'bool');
+        setSetting('printer_type', $_POST['printer_type'] ?? 'usb', 'string');
+        setSetting('printer_ip', $_POST['printer_ip'] ?? '', 'string');
+        setSetting('printer_port', $_POST['printer_port'] ?? '9100', 'int');
+        setSetting('auto_print_completion', isset($_POST['auto_print_completion']) ? '1' : '0', 'bool');
+        
+        // Scanner settings
+        setSetting('scanner_enabled', isset($_POST['scanner_enabled']) ? '1' : '0', 'bool');
+        setSetting('scanner_prefix', $_POST['scanner_prefix'] ?? '', 'string');
+        setSetting('scanner_suffix', $_POST['scanner_suffix'] ?? "\n", 'string');
+        
+        // SMS settings
+        setSetting('sms_enabled', isset($_POST['sms_enabled']) ? '1' : '0', 'bool');
+        setSetting('sms_provider', $_POST['sms_provider'] ?? 'twilio', 'string');
+        setSetting('sms_api_key', $_POST['sms_api_key'] ?? '', 'string');
+        setSetting('sms_api_secret', $_POST['sms_api_secret'] ?? '', 'string');
+        setSetting('reminder_check_interval', $_POST['reminder_check_interval'] ?? '5', 'int');
+        
+        $message = 'Settings saved successfully!';
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
+
+// Load current settings
+$settings = [
+    'printer_enabled' => getSetting('printer_enabled', true),
+    'printer_type' => getSetting('printer_type', 'usb'),
+    'printer_ip' => getSetting('printer_ip', '192.168.1.100'),
+    'printer_port' => getSetting('printer_port', 9100),
+    'auto_print_completion' => getSetting('auto_print_completion', true),
+    'scanner_enabled' => getSetting('scanner_enabled', true),
+    'scanner_prefix' => getSetting('scanner_prefix', ''),
+    'scanner_suffix' => getSetting('scanner_suffix', "\n"),
+    'sms_enabled' => getSetting('sms_enabled', false),
+    'sms_provider' => getSetting('sms_provider', 'twilio'),
+    'sms_api_key' => getSetting('sms_api_key', ''),
+    'sms_api_secret' => getSetting('sms_api_secret', ''),
+    'reminder_check_interval' => getSetting('reminder_check_interval', 5),
+];
+
+include __DIR__ . '/../includes/header.php';
+?>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="page-header d-print-none">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title"><i class="ti ti-settings"></i> System Settings</h2>
+                </div>
+            </div>
+        </div>
+        
+        <?php if ($message): ?>
+        <div class="alert alert-success alert-dismissible">
+            <i class="ti ti-check"></i> <?php echo h($message); ?>
+            <a class="btn-close" data-bs-dismiss="alert"></a>
+        </div>
+        <?php endif; ?>
+        
+        <?php if ($error): ?>
+        <div class="alert alert-danger">
+            <i class="ti ti-alert-circle"></i> <?php echo h($error); ?>
+        </div>
+        <?php endif; ?>
+        
+        <form method="POST">
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <!-- Printer Settings -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-printer"></i> Thermal Printer Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-check form-switch">
+                                    <input type="checkbox" name="printer_enabled" class="form-check-input" value="1" <?php echo $settings['printer_enabled'] ? 'checked' : ''; ?>>
+                                    <span class="form-check-label">Enable thermal printer</span>
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Connection Type</label>
+                                <select name="printer_type" class="form-select">
+                                    <option value="usb" <?php echo $settings['printer_type'] === 'usb' ? 'selected' : ''; ?>>USB</option>
+                                    <option value="ethernet" <?php echo $settings['printer_type'] === 'ethernet' ? 'selected' : ''; ?>>Ethernet (Network)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="ethernet-settings">
+                                <label class="form-label">Printer IP Address</label>
+                                <input type="text" name="printer_ip" class="form-control" value="<?php echo h($settings['printer_ip']); ?>" placeholder="192.168.1.100">
+                            </div>
+                            
+                            <div class="mb-3" id="ethernet-port">
+                                <label class="form-label">Printer Port</label>
+                                <input type="number" name="printer_port" class="form-control" value="<?php echo $settings['printer_port']; ?>" placeholder="9100">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-check form-switch">
+                                    <input type="checkbox" name="auto_print_completion" class="form-check-input" value="1" <?php echo $settings['auto_print_completion'] ? 'checked' : ''; ?>>
+                                    <span class="form-check-label">Auto-print completion receipts</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Scanner Settings -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-scan"></i> Barcode Scanner Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-check form-switch">
+                                    <input type="checkbox" name="scanner_enabled" class="form-check-input" value="1" <?php echo $settings['scanner_enabled'] ? 'checked' : ''; ?>>
+                                    <span class="form-check-label">Enable barcode scanner</span>
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Scanner Prefix</label>
+                                <input type="text" name="scanner_prefix" class="form-control" value="<?php echo h($settings['scanner_prefix']); ?>" placeholder="Characters before barcode">
+                                <small class="form-hint">Leave empty if none</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Scanner Suffix</label>
+                                <input type="text" name="scanner_suffix" class="form-control" value="<?php echo h($settings['scanner_suffix']); ?>" placeholder="Characters after barcode">
+                                <small class="form-hint">Usually Enter key (\n)</small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="ti ti-info-circle"></i> Zebra DS81XX-HC operates in keyboard emulation mode. No special drivers needed!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <!-- SMS Settings -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-message"></i> SMS Reminder Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-check form-switch">
+                                    <input type="checkbox" name="sms_enabled" class="form-check-input" value="1" <?php echo $settings['sms_enabled'] ? 'checked' : ''; ?>>
+                                    <span class="form-check-label">Enable SMS reminders</span>
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">SMS Provider</label>
+                                <select name="sms_provider" class="form-select">
+                                    <option value="twilio" <?php echo $settings['sms_provider'] === 'twilio' ? 'selected' : ''; ?>>Twilio</option>
+                                    <option value="nexmo" <?php echo $settings['sms_provider'] === 'nexmo' ? 'selected' : ''; ?>>Nexmo/Vonage</option>
+                                    <option value="aws" <?php echo $settings['sms_provider'] === 'aws' ? 'selected' : ''; ?>>AWS SNS</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">API Key / Account SID</label>
+                                <input type="text" name="sms_api_key" class="form-control" value="<?php echo h($settings['sms_api_key']); ?>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">API Secret / Auth Token</label>
+                                <input type="password" name="sms_api_secret" class="form-control" value="<?php echo h($settings['sms_api_secret']); ?>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Reminder Check Interval (minutes)</label>
+                                <input type="number" name="reminder_check_interval" class="form-control" value="<?php echo $settings['reminder_check_interval']; ?>" min="1" max="60">
+                                <small class="form-hint">How often to check for due reminders</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-footer">
+                            <div class="d-flex">
+                                <a href="/index.php" class="btn btn-link">Back to Dashboard</a>
+                                <button type="submit" class="btn btn-primary ms-auto">
+                                    <i class="ti ti-device-floppy"></i> Save Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php include __DIR__ . '/../includes/footer.php'; ?>
