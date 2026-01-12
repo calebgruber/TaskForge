@@ -8,6 +8,9 @@ $user = getCurrentUser();
 include 'includes/header.php';
 ?>
 
+<!-- Canvas Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
 <div class="page-body">
     <div class="container-xl">
         <div class="row justify-content-center">
@@ -138,6 +141,9 @@ scannerForm.addEventListener('submit', async (e) => {
             // Play success sound (optional)
             playSuccessSound();
             
+            // Trigger confetti animation
+            triggerConfetti(data.xp_result.leveled_up);
+            
             // Level up notification
             if (data.xp_result.leveled_up) {
                 setTimeout(() => {
@@ -221,6 +227,47 @@ function playSuccessSound() {
         oscillator.stop(audioContext.currentTime + 0.2);
     } catch (e) {
         // Audio not supported, skip
+    }
+}
+
+function triggerConfetti(isLevelUp) {
+    // Use canvas-confetti library if available
+    if (typeof confetti === 'function') {
+        if (isLevelUp) {
+            // Extra special confetti for level up
+            const duration = 3000;
+            const end = Date.now() + duration;
+            
+            const colors = ['#FFD700', '#FFA500', '#FF6347', '#4169E1', '#32CD32'];
+            
+            (function frame() {
+                confetti({
+                    particleCount: 7,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 7,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+                
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        } else {
+            // Regular completion confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
     }
 }
 
