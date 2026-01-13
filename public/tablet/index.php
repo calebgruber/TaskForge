@@ -4,7 +4,7 @@
  * Touch-optimized interface for Windows tablets
  */
 
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 // Check if user is logged in
 if (!isLoggedIn()) {

@@ -3,7 +3,7 @@
  * Tablet Mode Login
  */
 
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 // If already logged in, redirect to tablet dashboard
 if (isLoggedIn()) {
