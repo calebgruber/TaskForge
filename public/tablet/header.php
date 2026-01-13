@@ -59,13 +59,13 @@ if (!isset($pageTitle)) {
             top: 0;
             left: 0;
             right: 0;
-            height: 80px;
+            height: 60px;
             background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
             color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 40px;
+            padding: 0 30px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
         }
@@ -73,33 +73,33 @@ if (!isset($pageTitle)) {
         .tablet-logo {
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 32px;
+            gap: 11px;
+            font-size: 24px;
             font-weight: 700;
         }
         
         .tablet-logo i {
-            font-size: 48px;
+            font-size: 36px;
         }
         
         .tablet-header-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
         
         .exit-button {
             background: rgba(255,255,255,0.2);
             border: 2px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 12px;
+            padding: 11px 22px;
+            font-size: 14px;
+            border-radius: 9px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-weight: 600;
         }
         
@@ -111,25 +111,25 @@ if (!isset($pageTitle)) {
         
         .tablet-content {
             position: fixed;
-            top: 80px;
+            top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 40px;
+            padding: 30px;
             -webkit-overflow-scrolling: touch;
         }
         
         .tablet-container {
-            max-width: 1400px;
+            max-width: 1050px;
             margin: 0 auto;
         }
         
         .tablet-card {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 15px;
+            padding: 30px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             transition: all 0.3s;
         }
@@ -142,13 +142,13 @@ if (!isset($pageTitle)) {
         .user-card {
             display: flex;
             align-items: center;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 22px;
+            margin-bottom: 30px;
         }
         
         .user-avatar {
-            width: 120px;
-            height: 120px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
             display: flex;
@@ -162,38 +162,38 @@ if (!isset($pageTitle)) {
         }
         
         .user-name {
-            font-size: 42px;
+            font-size: 32px;
             font-weight: 700;
-            margin: 0 0 15px 0;
+            margin: 0 0 11px 0;
             color: #1a202c;
         }
         
         .user-level {
             display: flex;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         .level-badge {
             background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
             color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 24px;
+            padding: 9px 18px;
+            border-radius: 38px;
+            font-size: 18px;
             font-weight: 700;
         }
         
         .xp-text {
-            font-size: 28px;
+            font-size: 21px;
             color: #64748b;
             font-weight: 600;
         }
         
         .progress-bar-large {
-            height: 24px;
+            height: 18px;
             background: #e2e8f0;
-            border-radius: 12px;
+            border-radius: 9px;
             overflow: hidden;
         }
         
@@ -205,17 +205,17 @@ if (!isset($pageTitle)) {
         
         .tablet-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+            gap: 22px;
+            margin-bottom: 30px;
         }
         
         .action-card {
             text-decoration: none;
             color: inherit;
             text-align: center;
-            padding: 60px 40px;
-            min-height: 280px;
+            padding: 45px 30px;
+            min-height: 210px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -223,20 +223,20 @@ if (!isset($pageTitle)) {
         }
         
         .action-card h2 {
-            font-size: 32px;
-            margin: 20px 0 10px;
+            font-size: 24px;
+            margin: 15px 0 8px;
             font-weight: 700;
         }
         
         .action-card p {
-            font-size: 20px;
+            font-size: 15px;
             color: #64748b;
             margin: 0;
         }
         
         .icon-huge {
-            font-size: 96px !important;
-            margin-bottom: 10px;
+            font-size: 72px !important;
+            margin-bottom: 8px;
         }
         
         .scanner-card { border-top: 6px solid #206bc4; }
@@ -253,64 +253,64 @@ if (!isset($pageTitle)) {
         
         .tablet-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
+            gap: 22px;
         }
         
         .stat-card {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 15px;
+            padding: 30px;
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 19px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         
         .stat-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 16px;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
             background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 40px;
+            font-size: 30px;
         }
         
         .stat-value {
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 700;
             color: #1a202c;
             line-height: 1;
         }
         
         .stat-label {
-            font-size: 20px;
+            font-size: 15px;
             color: #64748b;
-            margin-top: 8px;
+            margin-top: 6px;
         }
         
         .btn-huge {
-            padding: 24px 48px;
-            font-size: 24px;
-            border-radius: 16px;
+            padding: 18px 36px;
+            font-size: 18px;
+            border-radius: 12px;
             font-weight: 700;
-            min-height: 80px;
+            min-height: 60px;
         }
         
         .form-control-huge {
-            font-size: 24px;
-            padding: 24px;
-            border-radius: 12px;
+            font-size: 18px;
+            padding: 18px;
+            border-radius: 9px;
             border: 2px solid #e2e8f0;
-            min-height: 80px;
+            min-height: 60px;
         }
         
         .form-control-huge:focus {
             border-color: #206bc4;
-            box-shadow: 0 0 0 4px rgba(32, 107, 196, 0.1);
+            box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.1);
         }
         
         /* Modal Styles */
@@ -333,34 +333,34 @@ if (!isset($pageTitle)) {
         
         .modal-content-large {
             background: white;
-            border-radius: 24px;
-            padding: 60px;
-            max-width: 600px;
+            border-radius: 18px;
+            padding: 45px;
+            max-width: 450px;
             width: 90%;
             box-shadow: 0 24px 48px rgba(0,0,0,0.3);
         }
         
         .modal-title {
-            font-size: 36px;
+            font-size: 27px;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 22px;
             text-align: center;
         }
         
         .pin-input {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
-            margin: 40px 0;
+            margin: 30px 0;
         }
         
         .pin-digit {
-            width: 80px;
-            height: 80px;
-            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
             text-align: center;
-            border: 3px solid #e2e8f0;
-            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 9px;
             font-weight: 700;
         }
         
@@ -371,13 +371,13 @@ if (!isset($pageTitle)) {
         
         .task-card-large {
             background: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 19px;
             transition: all 0.3s;
         }
         
@@ -387,13 +387,13 @@ if (!isset($pageTitle)) {
         }
         
         .task-icon-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 27px;
             color: white;
         }
         
@@ -402,20 +402,20 @@ if (!isset($pageTitle)) {
         }
         
         .task-title-large {
-            font-size: 28px;
+            font-size: 21px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #1a202c;
         }
         
         .task-meta-large {
-            font-size: 20px;
+            font-size: 15px;
             color: #64748b;
         }
         
         .task-actions-large {
             display: flex;
-            gap: 15px;
+            gap: 11px;
         }
     </style>
 </head>
@@ -443,7 +443,7 @@ if (!isset($pageTitle)) {
     <div id="exitModal" class="tablet-modal">
         <div class="modal-content-large">
             <h2 class="modal-title">Enter Admin PIN</h2>
-            <p style="text-align: center; font-size: 20px; color: #64748b; margin-bottom: 30px;">
+            <p style="text-align: center; font-size: 15px; color: #64748b; margin-bottom: 22px;">
                 Enter the 4-digit PIN to exit Tablet Mode
             </p>
             <form id="exitForm" onsubmit="verifyPin(event)">
@@ -453,11 +453,11 @@ if (!isset($pageTitle)) {
                     <input type="password" class="pin-digit" maxlength="1" id="pin3">
                     <input type="password" class="pin-digit" maxlength="1" id="pin4">
                 </div>
-                <div style="display: flex; gap: 20px;">
+                <div style="display: flex; gap: 15px;">
                     <button type="button" class="btn btn-secondary btn-huge" onclick="hideExitModal()" style="flex: 1;">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-huge" style="flex: 1;">Verify</button>
                 </div>
-                <div id="pinError" style="color: #ef4444; text-align: center; margin-top: 20px; font-size: 20px; display: none;">
+                <div id="pinError" style="color: #ef4444; text-align: center; margin-top: 15px; font-size: 15px; display: none;">
                     Incorrect PIN. Please try again.
                 </div>
             </form>

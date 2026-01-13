@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px;
+            padding: 45px;
             color: white;
             position: relative;
             overflow: hidden;
@@ -108,9 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .illustration-icon {
-            font-size: 180px;
-            margin-bottom: 40px;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2));
+            font-size: 135px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2));
             animation: pulse 3s ease-in-out infinite;
         }
         
@@ -120,35 +120,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .illustration-title {
-            font-size: 64px;
+            font-size: 48px;
             font-weight: 800;
-            margin: 0 0 20px 0;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
         
         .illustration-subtitle {
-            font-size: 32px;
+            font-size: 24px;
             opacity: 0.9;
             margin: 0;
             font-weight: 300;
         }
         
         .illustration-features {
-            margin-top: 60px;
+            margin-top: 45px;
             display: flex;
-            gap: 40px;
+            gap: 30px;
             justify-content: center;
         }
         
         .feature-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 24px;
+            gap: 11px;
+            font-size: 18px;
         }
         
         .feature-item i {
-            font-size: 36px;
+            font-size: 27px;
         }
         
         /* Right Side - Login Form */
@@ -158,47 +158,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 60px;
+            padding: 45px;
         }
         
         .login-form-container {
             width: 100%;
-            max-width: 550px;
+            max-width: 413px;
         }
         
         .login-header {
-            margin-bottom: 50px;
+            margin-bottom: 38px;
         }
         
         .login-header h2 {
-            font-size: 42px;
+            font-size: 32px;
             font-weight: 700;
             color: #1a202c;
-            margin: 0 0 15px 0;
+            margin: 0 0 11px 0;
         }
         
         .login-header p {
-            font-size: 22px;
+            font-size: 17px;
             color: #64748b;
             margin: 0;
         }
         
         .form-group-large {
-            margin-bottom: 30px;
+            margin-bottom: 22px;
         }
         
         .form-label-large {
-            font-size: 22px;
+            font-size: 17px;
             font-weight: 600;
             color: #1a202c;
-            margin-bottom: 12px;
+            margin-bottom: 9px;
             display: block;
         }
         
         .form-control-huge {
-            font-size: 22px;
-            padding: 22px;
-            border-radius: 12px;
+            font-size: 17px;
+            padding: 17px;
+            border-radius: 9px;
             border: 2px solid #e2e8f0;
             width: 100%;
             transition: all 0.3s;
@@ -206,21 +206,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .form-control-huge:focus {
             border-color: #206bc4;
-            box-shadow: 0 0 0 4px rgba(32, 107, 196, 0.1);
+            box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.1);
             outline: none;
         }
         
         .btn-huge {
-            padding: 24px 48px;
-            font-size: 24px;
-            border-radius: 16px;
+            padding: 18px 36px;
+            font-size: 18px;
+            border-radius: 12px;
             font-weight: 700;
             width: 100%;
-            min-height: 80px;
+            min-height: 60px;
             border: none;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         
         .btn-primary-huge {
@@ -237,34 +237,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #fef2f2;
             border: 2px solid #ef4444;
             color: #991b1b;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 20px;
-            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 9px;
+            font-size: 15px;
+            margin-bottom: 22px;
             text-align: center;
         }
         
         .signup-section {
-            margin-top: 50px;
-            padding-top: 40px;
+            margin-top: 38px;
+            padding-top: 30px;
             border-top: 2px solid #e2e8f0;
             text-align: center;
         }
         
         .signup-title {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
             color: #1a202c;
-            margin: 0 0 20px 0;
+            margin: 0 0 15px 0;
         }
         
         .signup-qr {
             background: white;
-            border: 3px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
             display: inline-block;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 9px rgba(0,0,0,0.1);
         }
         
         .signup-qr canvas {
@@ -272,9 +272,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .signup-text {
-            font-size: 18px;
+            font-size: 14px;
             color: #64748b;
-            margin-top: 15px;
+            margin-top: 11px;
         }
     </style>
 </head>
@@ -354,8 +354,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         new QRCode(document.getElementById("qrcode"), {
             text: signupUrl,
-            width: 180,
-            height: 180,
+            width: 135,
+            height: 135,
             colorDark: "#1a202c",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
