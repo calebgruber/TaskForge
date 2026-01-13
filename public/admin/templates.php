@@ -60,8 +60,13 @@ include __DIR__ . '/../includes/header.php';
         <div class="page-header d-print-none">
             <div class="row align-items-center">
                 <div class="col">
-                    <h2 class="page-title"><i class="ti ti-template"></i> Receipt Templates</h2>
-                    <div class="text-muted mt-1">Design custom thermal printer layouts</div>
+                    <h2 class="page-title"><i class="ti ti-template"></i> Receipt Templates - Easy Mode</h2>
+                    <div class="text-muted mt-1">Design custom thermal printer layouts with simple form controls</div>
+                </div>
+                <div class="col-auto">
+                    <a href="/admin/template-designer.php" class="btn btn-primary">
+                        <i class="ti ti-palette"></i> Switch to Advanced Mode
+                    </a>
                 </div>
             </div>
         </div>
@@ -209,9 +214,83 @@ include __DIR__ . '/../includes/header.php';
                         </table>
                     </div>
                 </div>
+                
+                <!-- Live Preview -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-eye"></i> Live Preview (80mm)</h3>
+                    </div>
+                    <div class="card-body" style="background: #f5f7fb;">
+                        <div style="width: 302px; margin: 0 auto; background: white; padding: 15px; font-family: 'Courier New', monospace; font-size: 12px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" id="receiptPreview">
+                            <div style="text-align: center; font-weight: bold; margin-bottom: 10px;" id="previewHeader">
+                                TASK QUEST
+                            </div>
+                            <div style="text-align: center; font-size: 14px; margin: 10px 0;" id="previewTitle">
+                                Sample Task Title
+                            </div>
+                            <div id="previewCategory" style="margin: 5px 0;">Category: Work</div>
+                            <div id="previewUrgency" style="margin: 5px 0;">Urgency: Normal</div>
+                            <div id="previewXP" style="margin: 5px 0;">XP Reward: 50 XP</div>
+                            <div id="previewDueDate" style="margin: 5px 0;">Due: Dec 31, 2024 12:00 PM</div>
+                            <div style="text-align: center; margin: 15px 0; padding: 10px; background: #f0f0f0; border: 1px solid #ddd;" id="previewBarcode">
+                                <div style="margin-bottom: 5px;">Scan to complete:</div>
+                                <div style="font-size: 10px; color: #666;" id="previewBarcodeType">CODE128 Barcode</div>
+                            </div>
+                            <div style="text-align: center; margin-top: 10px;" id="previewFooter">
+                                Scan to complete
+                            </div>
+                            <div id="previewTimestamp" style="text-align: center; margin-top: 10px; font-size: 10px; color: #666;">
+                                2024-12-31 12:00:00
+                            </div>
+                            <div style="text-align: center; margin-top: 15px; color: #999;">
+                                <small>Receipt Length: <span id="previewLength">300</span>mm</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Live preview updates
+const headerInput = document.querySelector('input[name="header_text"]');
+const footerInput = document.querySelector('input[name="footer_text"]');
+const barcodeTypeSelect = document.querySelector('select[name="barcode_type"]');
+const receiptLengthInput = document.querySelector('input[name="receipt_length"]');
+const showTimestamp = document.querySelector('input[name="show_timestamp"]');
+const showUrgency = document.querySelector('input[name="show_urgency"]');
+const showXP = document.querySelector('input[name="show_xp_value"]');
+const showCategory = document.querySelector('input[name="show_category"]');
+const showDueDate = document.querySelector('input[name="show_due_date"]');
+
+function updatePreview() {
+    document.getElementById('previewHeader').textContent = headerInput.value || 'TASK QUEST';
+    document.getElementById('previewFooter').textContent = footerInput.value || 'Scan to complete';
+    document.getElementById('previewBarcodeType').textContent = barcodeTypeSelect.value + ' Barcode';
+    document.getElementById('previewLength').textContent = receiptLengthInput.value || '300';
+    
+    document.getElementById('previewTimestamp').style.display = showTimestamp.checked ? 'block' : 'none';
+    document.getElementById('previewUrgency').style.display = showUrgency.checked ? 'block' : 'none';
+    document.getElementById('previewXP').style.display = showXP.checked ? 'block' : 'none';
+    document.getElementById('previewCategory').style.display = showCategory.checked ? 'block' : 'none';
+    document.getElementById('previewDueDate').style.display = showDueDate.checked ? 'block' : 'none';
+}
+
+// Add event listeners
+headerInput.addEventListener('input', updatePreview);
+footerInput.addEventListener('input', updatePreview);
+barcodeTypeSelect.addEventListener('change', updatePreview);
+receiptLengthInput.addEventListener('input', updatePreview);
+showTimestamp.addEventListener('change', updatePreview);
+showUrgency.addEventListener('change', updatePreview);
+showXP.addEventListener('change', updatePreview);
+showCategory.addEventListener('change', updatePreview);
+showDueDate.addEventListener('change', updatePreview);
+
+// Initial update
+updatePreview();
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
