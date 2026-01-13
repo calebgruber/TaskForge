@@ -72,14 +72,37 @@ if (isset($_POST['reprint_task'])) {
     }
 }
 
-// Get completed tasks for reprinting
-$completedTasks = $db->fetchAll("
-    SELECT t.*, c.name as category_name, c.icon_id as category_icon_id
+// Get filter from query parameter
+$statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all';
+
+// Build query based on filter
+$whereClause = '';
+if ($statusFilter === 'active') {
+    $whereClause = "WHERE t.status = 'active'";
+} elseif ($statusFilter === 'completed') {
+    $whereClause = "WHERE t.status = 'completed'";
+} elseif ($statusFilter === 'overdue') {
+    $whereClause = "WHERE t.status = 'active' AND t.due_date < NOW()";
+}
+
+// Get tasks for reprinting
+$tasks = $db->fetchAll("
+    SELECT t.*, c.name as category_name, c.icon_id as category_icon_id,
+           u.username
     FROM tasks t
     LEFT JOIN categories c ON t.category_id = c.id
-    WHERE t.status = 'completed'
-    ORDER BY t.completed_at DESC
-    LIMIT 50
+    LEFT JOIN users u ON t.user_id = u.id
+    {$whereClause}
+    ORDER BY 
+        CASE 
+            WHEN t.status = 'active' AND t.due_date < NOW() THEN 1
+            WHEN t.status = 'active' THEN 2
+            WHEN t.status = 'completed' THEN 3
+            ELSE 4
+        END,
+        t.due_date ASC,
+        t.completed_at DESC
+    LIMIT 100
 ");
 
 require_once __DIR__ . '/../includes/header.php';
@@ -221,20 +244,49 @@ require_once __DIR__ . '/../includes/header.php';
                                 <i class="ti ti-refresh me-2"></i>
                                 Reprint Task Receipts
                             </h3>
+                            <div class="card-actions">
+                                <div class="btn-group">
+                                    <a href="?status=all" class="btn btn-sm <?php echo $statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                                        All Tasks
+                                    </a>
+                                    <a href="?status=active" class="btn btn-sm <?php echo $statusFilter === 'active' ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                                        Active
+                                    </a>
+                                    <a href="?status=overdue" class="btn btn-sm <?php echo $statusFilter === 'overdue' ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                                        Overdue
+                                    </a>
+                                    <a href="?status=completed" class="btn btn-sm <?php echo $statusFilter === 'completed' ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                                        Completed
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <p class="text-muted">
-                                Reprint receipts for previously completed tasks. This is useful if a receipt failed to print or was lost.
+                                Print or reprint receipts for any task. This includes active tasks, overdue tasks, and completed tasks.
                             </p>
                             
-                            <?php if (empty($completedTasks)): ?>
+                            <div class="alert alert-info">
+                                <i class="ti ti-info-circle me-2"></i>
+                                <strong>ESC/POS Support:</strong> This system supports EPSON ESC/POS thermal printers via USB or network connection.
+                            </div>
+                            
+                            <?php if (empty($tasks)): ?>
                                 <div class="empty">
                                     <div class="empty-icon">
                                         <i class="ti ti-checkbox"></i>
                                     </div>
-                                    <p class="empty-title">No completed tasks</p>
+                                    <p class="empty-title">No tasks found</p>
                                     <p class="empty-subtitle text-muted">
-                                        Complete some tasks first, then you'll be able to reprint their receipts here.
+                                        <?php if ($statusFilter === 'all'): ?>
+                                            There are no tasks in the system yet.
+                                        <?php elseif ($statusFilter === 'active'): ?>
+                                            There are no active tasks.
+                                        <?php elseif ($statusFilter === 'overdue'): ?>
+                                            There are no overdue tasks.
+                                        <?php else: ?>
+                                            There are no completed tasks.
+                                        <?php endif; ?>
                                     </p>
                                 </div>
                             <?php else: ?>
@@ -243,15 +295,20 @@ require_once __DIR__ . '/../includes/header.php';
                                         <thead>
                                             <tr>
                                                 <th>Task</th>
+                                                <th>User</th>
                                                 <th>Category</th>
-                                                <th>Completed</th>
+                                                <th>Status</th>
+                                                <th>Due / Completed</th>
                                                 <th>XP</th>
                                                 <th class="w-1"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($completedTasks as $task): ?>
-                                                <tr>
+                                            <?php foreach ($tasks as $task): ?>
+                                                <?php
+                                                $isOverdue = $task['status'] === 'active' && strtotime($task['due_date']) < time();
+                                                ?>
+                                                <tr class="<?php echo $isOverdue ? 'table-danger' : ''; ?>">
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <?php if ($task['urgency'] === 'high'): ?>
@@ -272,6 +329,11 @@ require_once __DIR__ . '/../includes/header.php';
                                                         </div>
                                                     </td>
                                                     <td>
+                                                        <?php if ($task['username']): ?>
+                                                            <span class="text-muted"><?php echo h($task['username']); ?></span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
                                                         <?php if ($task['category_name']): ?>
                                                             <span class="badge">
                                                                 <?php echo h($task['category_name']); ?>
@@ -279,7 +341,20 @@ require_once __DIR__ . '/../includes/header.php';
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo date('M j, Y g:i A', strtotime($task['completed_at'])); ?>
+                                                        <?php if ($task['status'] === 'completed'): ?>
+                                                            <span class="badge bg-success">Completed</span>
+                                                        <?php elseif ($isOverdue): ?>
+                                                            <span class="badge bg-danger">Overdue</span>
+                                                        <?php else: ?>
+                                                            <span class="badge bg-blue">Active</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($task['status'] === 'completed' && $task['completed_at']): ?>
+                                                            <?php echo date('M j, Y g:i A', strtotime($task['completed_at'])); ?>
+                                                        <?php elseif ($task['due_date']): ?>
+                                                            Due: <?php echo date('M j, Y', strtotime($task['due_date'])); ?>
+                                                        <?php endif; ?>
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-green">
@@ -289,7 +364,7 @@ require_once __DIR__ . '/../includes/header.php';
                                                     <td>
                                                         <form method="POST" style="display:inline;">
                                                             <input type="hidden" name="task_id" value="<?php echo $task['id']; ?>">
-                                                            <button type="submit" name="reprint_task" class="btn btn-sm btn-outline-primary" title="Reprint Receipt">
+                                                            <button type="submit" name="reprint_task" class="btn btn-sm btn-outline-primary" title="Print Receipt">
                                                                 <i class="ti ti-printer"></i>
                                                             </button>
                                                         </form>
