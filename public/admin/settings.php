@@ -110,7 +110,7 @@ $settings = [
     'reminder_check_interval' => getSetting('reminder_check_interval', 5),
 ];
 
-include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-body">
@@ -344,4 +344,4 @@ if (deviceSelect && customPathInput) {
 }
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

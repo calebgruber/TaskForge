@@ -52,7 +52,7 @@ if (isset($_GET['delete'])) {
 // Get all templates
 $templates = $db->fetchAll("SELECT * FROM receipt_templates ORDER BY template_type, name");
 
-include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-body">
@@ -320,4 +320,4 @@ showDueDate.addEventListener('change', updatePreview);
 updatePreview();
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

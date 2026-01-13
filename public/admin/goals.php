@@ -83,7 +83,7 @@ $users = $db->fetchAll("SELECT id, username FROM users ORDER BY username");
 // Get categories for dropdown
 $categories = $db->fetchAll("SELECT id, name FROM categories ORDER BY name");
 
-include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-body">
@@ -301,4 +301,4 @@ include __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

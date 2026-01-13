@@ -147,6 +147,12 @@
                                     <a class="dropdown-item" href="/admin/xp-rules.php">
                                         <i class="ti ti-chart-bar me-2"></i> XP Rules
                                     </a>
+                                    <a class="dropdown-item" href="/admin/goals.php">
+                                        <i class="ti ti-target me-2"></i> Goals
+                                    </a>
+                                    <a class="dropdown-item" href="/admin/rewards.php">
+                                        <i class="ti ti-trophy me-2"></i> Rewards
+                                    </a>
                                     <a class="dropdown-item" href="/admin/settings.php">
                                         <i class="ti ti-adjustments me-2"></i> Settings
                                     </a>

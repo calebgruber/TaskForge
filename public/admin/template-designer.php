@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_template'])) {
 // Get icons for palette
 $icons = $db->fetchAll("SELECT * FROM icons ORDER BY icon_type, name");
 
-include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <style>
@@ -249,6 +249,14 @@ include __DIR__ . '/../../includes/header.php';
                         </div>
                         
                         <h4 class="mt-4 mb-3">Icons</h4>
+                        <?php foreach ($icons as $icon): ?>
+                            <div class="palette-item" draggable="true" data-type="icon" data-icon="uploaded:<?php echo $icon['id']; ?>" data-icon-path="<?php echo h($icon['file_path']); ?>">
+                                <img src="<?php echo h($icon['file_path']); ?>" style="width: 24px; height: 24px; vertical-align: middle;">
+                                <?php echo h($icon['name']); ?>
+                            </div>
+                        <?php endforeach; ?>
+                        
+                        <h4 class="mt-4 mb-3">Tabler Icons</h4>
                         <div class="palette-item" draggable="true" data-type="icon" data-icon="tabler:check">
                             <i class="ti ti-check"></i> Checkmark
                         </div>
@@ -260,6 +268,12 @@ include __DIR__ . '/../../includes/header.php';
                         </div>
                         <div class="palette-item" draggable="true" data-type="icon" data-icon="tabler:flame">
                             <i class="ti ti-flame"></i> Flame
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="icon" data-icon="tabler:list-check">
+                            <i class="ti ti-list-check"></i> Task List
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="icon" data-icon="tabler:bolt">
+                            <i class="ti ti-bolt"></i> Lightning
                         </div>
                         
                         <h4 class="mt-4 mb-3">Images</h4>
@@ -397,6 +411,61 @@ let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+// Image upload handler with grayscale conversion
+function handleImageUpload(input) {
+    if (!input.files || !input.files[0] || !selectedElement) return;
+    
+    const file = input.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // Create temp canvas for grayscale conversion
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Draw original image
+            tempCtx.drawImage(img, 0, 0);
+            
+            // Get image data and convert to grayscale
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                data[i] = gray;     // Red
+                data[i + 1] = gray; // Green
+                data[i + 2] = gray; // Blue
+            }
+            
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // Store grayscale image data
+            selectedElement.imageData = tempCanvas.toDataURL('image/png');
+            selectedElement.imageObj = new Image();
+            selectedElement.imageObj.src = selectedElement.imageData;
+            
+            // Show preview
+            const previewCanvas = document.getElementById('imagePreview');
+            if (previewCanvas) {
+                previewCanvas.width = tempCanvas.width;
+                previewCanvas.height = tempCanvas.height;
+                const previewCtx = previewCanvas.getContext('2d');
+                previewCtx.putImageData(imageData, 0, 0);
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            }
+            
+            redrawCanvas();
+        };
+        img.src = e.target.result;
+    };
+    
+    reader.readAsDataURL(file);
+}
+
 // Barcode sample images
 const barcodeImages = {};
 const barcodeSamples = {
@@ -468,6 +537,7 @@ canvas.addEventListener('drop', (e) => {
     if (type === 'text') {
         element.content = data.content || 'Sample Text';
         element.fontSize = 16;
+        element.fontFamily = 'Arial';
         element.fontWeight = 'normal';
         element.textAlign = 'left';
     } else if (type === 'barcode') {
@@ -479,8 +549,14 @@ canvas.addEventListener('drop', (e) => {
         element.fillColor = '#000000';
     } else if (type === 'icon') {
         element.icon = data.icon;
+        element.iconPath = data.iconPath;
         element.width = 48;
         element.height = 48;
+    } else if (type === 'image') {
+        element.width = 100;
+        element.height = 100;
+        element.imageData = null;
+        element.imageObj = null;
     }
     
     elements.push(element);
@@ -539,7 +615,8 @@ function redrawCanvas() {
         }
         
         if (el.type === 'text') {
-            ctx.font = `${el.fontWeight} ${el.fontSize}px Arial`;
+            const fontFamily = el.fontFamily || 'Arial';
+            ctx.font = `${el.fontWeight} ${el.fontSize}px ${fontFamily}`;
             ctx.fillStyle = '#000000';
             ctx.textAlign = el.textAlign || 'left';
             // Show sample data for variables
@@ -591,6 +668,20 @@ function redrawCanvas() {
             ctx.fillStyle = '#666';
             ctx.font = '14px Arial';
             ctx.fillText('Icon: ' + el.icon.split(':')[1], el.x, el.y + 20);
+        } else if (el.type === 'image') {
+            if (el.imageObj && el.imageObj.complete) {
+                ctx.drawImage(el.imageObj, el.x, el.y, el.width, el.height);
+            } else {
+                // Placeholder
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(el.x, el.y, el.width, el.height);
+                ctx.strokeStyle = '#000';
+                ctx.strokeRect(el.x, el.y, el.width, el.height);
+                ctx.fillStyle = '#666';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Upload Image', el.x + el.width/2, el.y + el.height/2);
+            }
         }
     });
 }
@@ -610,6 +701,17 @@ function showProperties(element) {
                 <small class="form-hint">Use variables like {{task_title}}, {{due_date}}, {{category}}, {{urgency}}, {{xp_value}}, {{timestamp}}, {{barcode}}, {{user_name}}, {{user_level}}</small>
             </div>
             <div class="mb-3">
+                <label class="form-label">Font Family</label>
+                <select class="form-select" id="propFontFamily">
+                    <option value="Arial" ${(element.fontFamily || 'Arial') === 'Arial' ? 'selected' : ''}>Arial</option>
+                    <option value="Courier New" ${(element.fontFamily || 'Arial') === 'Courier New' ? 'selected' : ''}>Courier New</option>
+                    <option value="Georgia" ${(element.fontFamily || 'Arial') === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                    <option value="Times New Roman" ${(element.fontFamily || 'Arial') === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                    <option value="Verdana" ${(element.fontFamily || 'Arial') === 'Verdana' ? 'selected' : ''}>Verdana</option>
+                    <option value="monospace" ${(element.fontFamily || 'Arial') === 'monospace' ? 'selected' : ''}>Monospace</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Font Size</label>
                 <input type="number" class="form-control" id="propFontSize" value="${element.fontSize}" min="8" max="48">
             </div>
@@ -619,6 +721,34 @@ function showProperties(element) {
                     <option value="normal" ${element.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
                     <option value="bold" ${element.fontWeight === 'bold' ? 'selected' : ''}>Bold</option>
                 </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Text Alignment</label>
+                <select class="form-select" id="propTextAlign">
+                    <option value="left" ${(element.textAlign || 'left') === 'left' ? 'selected' : ''}>Left</option>
+                    <option value="center" ${(element.textAlign || 'left') === 'center' ? 'selected' : ''}>Center</option>
+                    <option value="right" ${(element.textAlign || 'left') === 'right' ? 'selected' : ''}>Right</option>
+                </select>
+            </div>
+        `;
+    } else if (element.type === 'image') {
+        html = `
+            <div class="mb-3">
+                <label class="form-label">Upload Image</label>
+                <input type="file" class="form-control" id="propImageFile" accept="image/*" onchange="handleImageUpload(this)">
+                <small class="form-hint">Image will be converted to grayscale</small>
+            </div>
+            <div class="mb-3" id="imagePreviewContainer" style="display: ${element.imageData ? 'block' : 'none'}">
+                <label class="form-label">Preview</label>
+                <canvas id="imagePreview" style="max-width: 100%; border: 1px solid #ddd;"></canvas>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Width</label>
+                <input type="number" class="form-control" id="propWidth" value="${element.width}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Height</label>
+                <input type="number" class="form-control" id="propHeight" value="${element.height}">
             </div>
         `;
     } else if (element.type === 'shape') {
@@ -673,8 +803,10 @@ function applyProperties() {
     
     if (selectedElement.type === 'text') {
         selectedElement.content = document.getElementById('propContent').value;
+        selectedElement.fontFamily = document.getElementById('propFontFamily').value;
         selectedElement.fontSize = parseInt(document.getElementById('propFontSize').value);
         selectedElement.fontWeight = document.getElementById('propFontWeight').value;
+        selectedElement.textAlign = document.getElementById('propTextAlign').value;
     } else if (selectedElement.type === 'shape') {
         selectedElement.fillColor = document.getElementById('propFillColor').value;
         selectedElement.width = parseInt(document.getElementById('propWidth').value);
@@ -682,6 +814,9 @@ function applyProperties() {
     } else if (selectedElement.type === 'barcode') {
         selectedElement.barcodeType = document.getElementById('propBarcodeType').value;
         selectedElement.width = parseInt(document.getElementById('propWidth').value);
+    } else if (selectedElement.type === 'image') {
+        selectedElement.width = parseInt(document.getElementById('propWidth').value);
+        selectedElement.height = parseInt(document.getElementById('propHeight').value);
     }
     
     redrawCanvas();
@@ -753,4 +888,4 @@ document.getElementById('previewBtn').addEventListener('click', () => {
 });
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
