@@ -74,7 +74,7 @@ if (isset($_POST['reprint_task'])) {
 
 // Get completed tasks for reprinting
 $completedTasks = $db->fetchAll("
-    SELECT t.*, c.name as category_name, c.icon as category_icon
+    SELECT t.*, c.name as category_name, c.icon_id as category_icon_id
     FROM tasks t
     LEFT JOIN categories c ON t.category_id = c.id
     WHERE t.status = 'completed'
@@ -274,9 +274,6 @@ require_once __DIR__ . '/../includes/header.php';
                                                     <td>
                                                         <?php if ($task['category_name']): ?>
                                                             <span class="badge">
-                                                                <?php if ($task['category_icon']): ?>
-                                                                    <i class="ti ti-<?php echo h($task['category_icon']); ?> me-1"></i>
-                                                                <?php endif; ?>
                                                                 <?php echo h($task['category_name']); ?>
                                                             </span>
                                                         <?php endif; ?>
