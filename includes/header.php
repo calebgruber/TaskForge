@@ -167,6 +167,9 @@
                                     <a class="dropdown-item" href="/admin/rewards.php">
                                         <i class="ti ti-trophy me-2"></i> Rewards
                                     </a>
+                                    <a class="dropdown-item" href="/admin/printer.php">
+                                        <i class="ti ti-printer me-2"></i> Printer
+                                    </a>
                                     <a class="dropdown-item" href="/admin/settings.php">
                                         <i class="ti ti-adjustments me-2"></i> Settings
                                     </a>
