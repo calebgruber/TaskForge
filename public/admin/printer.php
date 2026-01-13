@@ -25,19 +25,29 @@ if (isset($_POST['test_print'])) {
     try {
         $printer = new Printer();
         $printer->connect();
+        $printer->initialize();
         
         // Print test receipt
-        $printer->printText("TaskForge Test Receipt", true, true);
-        $printer->printText("");
-        $printer->printText("Date: " . date('Y-m-d H:i:s'));
-        $printer->printText("User: " . getCurrentUser()->get('username'));
-        $printer->printText("");
-        $printer->printText("This is a test print to verify");
-        $printer->printText("your thermal printer is working");
-        $printer->printText("correctly with TaskForge.");
-        $printer->printText("");
+        $printer->setAlignment('center');
+        $printer->setBold(true);
+        $printer->setFontSize(2);
+        $printer->textLine("TaskForge Test Receipt");
+        $printer->setBold(false);
+        $printer->setFontSize(0);
+        $printer->feed(1);
+        
+        $printer->setAlignment('left');
+        $printer->textLine("Date: " . date('Y-m-d H:i:s'));
+        $printer->textLine("User: " . getCurrentUser()->get('username'));
+        $printer->feed(1);
+        $printer->textLine("This is a test print to verify");
+        $printer->textLine("your thermal printer is working");
+        $printer->textLine("correctly with TaskForge.");
+        $printer->feed(2);
+        
+        $printer->setAlignment('center');
         $printer->printBarcode("TEST" . date('YmdHis'), 'CODE128');
-        $printer->printText("");
+        $printer->feed(3);
         $printer->cut();
         
         $printer->disconnect();
@@ -60,7 +70,7 @@ if (isset($_POST['reprint_task'])) {
         }
         
         $printer = new Printer();
-        $result = $printer->printTask($taskId);
+        $result = $printer->printTaskReceipt($task);
         
         if ($result) {
             $message = "Task receipt reprinted successfully!";
@@ -230,6 +240,38 @@ require_once __DIR__ . '/../includes/header.php';
                                 <i class="ti ti-settings me-2"></i>
                                 Configure Printer
                             </a>
+                            
+                            <!-- Finding Printer Device Guide -->
+                            <div class="alert alert-info mt-3 mb-0">
+                                <h4 class="alert-title">
+                                    <i class="ti ti-help me-2"></i>
+                                    How to Find Your Printer Device Path
+                                </h4>
+                                <div class="text-muted">
+                                    <strong>On Windows:</strong>
+                                    <ol class="mb-2 mt-2">
+                                        <li>Open <strong>Device Manager</strong> (Win + X, then M)</li>
+                                        <li>Expand <strong>Printers</strong> or <strong>Print queues</strong></li>
+                                        <li>Right-click your thermal printer → <strong>Properties</strong></li>
+                                        <li>Go to <strong>Details</strong> tab → Select <strong>Device instance path</strong></li>
+                                        <li>Or use <strong>Ports</strong> tab to see the COM port (e.g., COM3)</li>
+                                    </ol>
+                                    <p class="mb-2">
+                                        <strong>Common Windows paths:</strong><br>
+                                        • <code>\\.\COM3</code> (USB/Serial printer on COM3)<br>
+                                        • <code>\\.\LPT1</code> (Parallel port printer)<br>
+                                        • <code>\\.\USB001</code> (USB printer)<br>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>For USB printers sharing:</strong><br>
+                                        • Share the printer in Windows settings<br>
+                                        • Use network path: <code>\\COMPUTER\PrinterName</code>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>EPSON ESC/POS printers:</strong> This system fully supports EPSON ESC/POS thermal printers via USB or network connection. Ensure your printer driver is installed.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
