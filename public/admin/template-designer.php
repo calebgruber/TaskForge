@@ -181,7 +181,37 @@ include __DIR__ . '/../../includes/header.php';
                         <h3 class="card-title">Elements</h3>
                     </div>
                     <div class="card-body">
-                        <h4 class="mb-3">Text</h4>
+                        <h4 class="mb-3">Variables</h4>
+                        <small class="text-muted d-block mb-2">These will be replaced with actual task data when printing</small>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{task_title}}">
+                            <i class="ti ti-file-text"></i> Task Title
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{due_date}}">
+                            <i class="ti ti-calendar"></i> Due Date
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{category}}">
+                            <i class="ti ti-folder"></i> Category
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{urgency}}">
+                            <i class="ti ti-alert-triangle"></i> Urgency Level
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{xp_value}}">
+                            <i class="ti ti-trophy"></i> XP Value
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{timestamp}}">
+                            <i class="ti ti-clock"></i> Timestamp
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{barcode}}">
+                            <i class="ti ti-barcode"></i> Barcode Text
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{user_name}}">
+                            <i class="ti ti-user"></i> User Name
+                        </div>
+                        <div class="palette-item" draggable="true" data-type="text" data-content="{{user_level}}">
+                            <i class="ti ti-star"></i> User Level
+                        </div>
+                        
+                        <h4 class="mt-4 mb-3">Text</h4>
                         <div class="palette-item" draggable="true" data-type="text" data-content="Sample Text">
                             <i class="ti ti-typography"></i> Text Block
                         </div>
@@ -367,6 +397,34 @@ let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+// Barcode sample images
+const barcodeImages = {};
+const barcodeSamples = {
+    'CODE128': 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="60"%3E%3Crect fill="%23fff" width="200" height="60"/%3E%3Cg fill="%23000"%3E%3Crect x="10" width="2" height="50"/%3E%3Crect x="15" width="1" height="50"/%3E%3Crect x="18" width="3" height="50"/%3E%3Crect x="24" width="2" height="50"/%3E%3Crect x="28" width="1" height="50"/%3E%3Crect x="32" width="3" height="50"/%3E%3Crect x="38" width="1" height="50"/%3E%3Crect x="42" width="2" height="50"/%3E%3Crect x="47" width="3" height="50"/%3E%3Crect x="53" width="1" height="50"/%3E%3Crect x="57" width="2" height="50"/%3E%3Crect x="62" width="3" height="50"/%3E%3Crect x="68" width="1" height="50"/%3E%3Crect x="72" width="2" height="50"/%3E%3Crect x="77" width="1" height="50"/%3E%3Crect x="81" width="3" height="50"/%3E%3Crect x="87" width="2" height="50"/%3E%3Crect x="92" width="1" height="50"/%3E%3Crect x="96" width="3" height="50"/%3E%3Crect x="102" width="1" height="50"/%3E%3Crect x="106" width="2" height="50"/%3E%3Crect x="111" width="3" height="50"/%3E%3Crect x="117" width="1" height="50"/%3E%3Crect x="121" width="2" height="50"/%3E%3Crect x="126" width="3" height="50"/%3E%3Crect x="132" width="1" height="50"/%3E%3Crect x="136" width="2" height="50"/%3E%3Crect x="141" width="1" height="50"/%3E%3Crect x="145" width="3" height="50"/%3E%3Crect x="151" width="2" height="50"/%3E%3Crect x="156" width="1" height="50"/%3E%3Crect x="160" width="3" height="50"/%3E%3Crect x="166" width="1" height="50"/%3E%3Crect x="170" width="2" height="50"/%3E%3Crect x="175" width="3" height="50"/%3E%3Crect x="181" width="1" height="50"/%3E%3Crect x="185" width="2" height="50"/%3E%3C/g%3E%3C/svg%3E',
+    'CODE39': 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="60"%3E%3Crect fill="%23fff" width="200" height="60"/%3E%3Cg fill="%23000"%3E%3Crect x="10" width="3" height="50"/%3E%3Crect x="18" width="1" height="50"/%3E%3Crect x="22" width="3" height="50"/%3E%3Crect x="30" width="1" height="50"/%3E%3Crect x="35" width="3" height="50"/%3E%3Crect x="43" width="1" height="50"/%3E%3Crect x="48" width="3" height="50"/%3E%3Crect x="56" width="1" height="50"/%3E%3Crect x="61" width="3" height="50"/%3E%3Crect x="69" width="1" height="50"/%3E%3Crect x="74" width="3" height="50"/%3E%3Crect x="82" width="1" height="50"/%3E%3Crect x="87" width="3" height="50"/%3E%3Crect x="95" width="1" height="50"/%3E%3Crect x="100" width="3" height="50"/%3E%3Crect x="108" width="1" height="50"/%3E%3Crect x="113" width="3" height="50"/%3E%3Crect x="121" width="1" height="50"/%3E%3Crect x="126" width="3" height="50"/%3E%3Crect x="134" width="1" height="50"/%3E%3Crect x="139" width="3" height="50"/%3E%3Crect x="147" width="1" height="50"/%3E%3Crect x="152" width="3" height="50"/%3E%3Crect x="160" width="1" height="50"/%3E%3Crect x="165" width="3" height="50"/%3E%3Crect x="173" width="1" height="50"/%3E%3Crect x="178" width="3" height="50"/%3E%3C/g%3E%3C/svg%3E',
+    'AZTEC': 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23fff" width="100" height="100"/%3E%3Cg fill="%23000"%3E%3Crect x="20" y="20" width="5" height="5"/%3E%3Crect x="30" y="20" width="5" height="5"/%3E%3Crect x="40" y="20" width="5" height="5"/%3E%3Crect x="50" y="20" width="5" height="5"/%3E%3Crect x="60" y="20" width="5" height="5"/%3E%3Crect x="70" y="20" width="5" height="5"/%3E%3Crect x="20" y="30" width="5" height="5"/%3E%3Crect x="70" y="30" width="5" height="5"/%3E%3Crect x="20" y="40" width="5" height="5"/%3E%3Crect x="30" y="40" width="5" height="5"/%3E%3Crect x="35" y="35" width="25" height="25"/%3E%3Crect x="60" y="40" width="5" height="5"/%3E%3Crect x="70" y="40" width="5" height="5"/%3E%3Crect x="20" y="50" width="5" height="5"/%3E%3Crect x="70" y="50" width="5" height="5"/%3E%3Crect x="20" y="60" width="5" height="5"/%3E%3Crect x="30" y="60" width="5" height="5"/%3E%3Crect x="60" y="60" width="5" height="5"/%3E%3Crect x="70" y="60" width="5" height="5"/%3E%3Crect x="20" y="70" width="5" height="5"/%3E%3Crect x="30" y="70" width="5" height="5"/%3E%3Crect x="40" y="70" width="5" height="5"/%3E%3Crect x="50" y="70" width="5" height="5"/%3E%3Crect x="60" y="70" width="5" height="5"/%3E%3Crect x="70" y="70" width="5" height="5"/%3E%3C/g%3E%3C/svg%3E',
+    'PDF417': 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect fill="%23fff" width="200" height="80"/%3E%3Cg fill="%23000"%3E%3Crect x="10" y="10" width="3" height="15"/%3E%3Crect x="15" y="10" width="1" height="15"/%3E%3Crect x="18" y="10" width="3" height="15"/%3E%3Crect x="23" y="10" width="1" height="15"/%3E%3Crect x="26" y="10" width="3" height="15"/%3E%3Crect x="31" y="10" width="1" height="15"/%3E%3Crect x="34" y="10" width="3" height="15"/%3E%3Crect x="39" y="10" width="1" height="15"/%3E%3Crect x="42" y="10" width="3" height="15"/%3E%3Crect x="47" y="10" width="1" height="15"/%3E%3Crect x="50" y="10" width="3" height="15"/%3E%3Crect x="55" y="10" width="1" height="15"/%3E%3Crect x="10" y="27" width="3" height="15"/%3E%3Crect x="15" y="27" width="1" height="15"/%3E%3Crect x="18" y="27" width="3" height="15"/%3E%3Crect x="23" y="27" width="1" height="15"/%3E%3Crect x="26" y="27" width="3" height="15"/%3E%3Crect x="31" y="27" width="1" height="15"/%3E%3Crect x="34" y="27" width="3" height="15"/%3E%3Crect x="39" y="27" width="1" height="15"/%3E%3Crect x="42" y="27" width="3" height="15"/%3E%3Crect x="47" y="27" width="1" height="15"/%3E%3Crect x="50" y="27" width="3" height="15"/%3E%3Crect x="55" y="27" width="1" height="15"/%3E%3Crect x="10" y="44" width="3" height="15"/%3E%3Crect x="15" y="44" width="1" height="15"/%3E%3Crect x="18" y="44" width="3" height="15"/%3E%3Crect x="23" y="44" width="1" height="15"/%3E%3Crect x="26" y="44" width="3" height="15"/%3E%3Crect x="31" y="44" width="1" height="15"/%3E%3Crect x="34" y="44" width="3" height="15"/%3E%3Crect x="39" y="44" width="1" height="15"/%3E%3Crect x="42" y="44" width="3" height="15"/%3E%3Crect x="47" y="44" width="1" height="15"/%3E%3Crect x="50" y="44" width="3" height="15"/%3E%3Crect x="55" y="44" width="1" height="15"/%3E%3C/g%3E%3C/svg%3E'
+};
+
+// Preload barcode images
+Object.keys(barcodeSamples).forEach(type => {
+    const img = new Image();
+    img.src = barcodeSamples[type];
+    barcodeImages[type] = img;
+});
+
+// Update canvas height based on receipt length
+function updateCanvasHeight() {
+    const length = parseInt(document.getElementById('receiptLength').value || 300);
+    // 80mm width = 302px at 96 DPI, calculate proportional height
+    // length in mm / 25.4 * 96 DPI = pixels
+    const heightPx = Math.round((length / 25.4) * 96);
+    canvas.height = Math.max(400, Math.min(heightPx, 2000)); // Limit between 400-2000px
+    redrawCanvas();
+}
+
+document.getElementById('receiptLength').addEventListener('input', updateCanvasHeight);
+
 // Initialize canvas
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -484,16 +542,35 @@ function redrawCanvas() {
             ctx.font = `${el.fontWeight} ${el.fontSize}px Arial`;
             ctx.fillStyle = '#000000';
             ctx.textAlign = el.textAlign || 'left';
-            ctx.fillText(el.content, el.x, el.y + el.fontSize);
+            // Show sample data for variables
+            let displayText = el.content;
+            if (displayText === '{{task_title}}') displayText = 'Complete Project Report';
+            else if (displayText === '{{due_date}}') displayText = 'Due: 2024-12-31 5:00 PM';
+            else if (displayText === '{{category}}') displayText = 'Category: Work';
+            else if (displayText === '{{urgency}}') displayText = 'Urgency: High';
+            else if (displayText === '{{xp_value}}') displayText = 'XP: 150';
+            else if (displayText === '{{timestamp}}') displayText = '2024-12-25 10:30:00';
+            else if (displayText === '{{barcode}}') displayText = 'TF20241225ABCD1234';
+            else if (displayText === '{{user_name}}') displayText = 'User: John Doe';
+            else if (displayText === '{{user_level}}') displayText = 'Level: 12';
+            
+            ctx.fillText(displayText, el.x, el.y + el.fontSize);
         } else if (el.type === 'barcode') {
-            ctx.fillStyle = '#f0f0f0';
-            ctx.fillRect(el.x, el.y, el.width, el.height);
-            ctx.strokeStyle = '#000';
-            ctx.strokeRect(el.x, el.y, el.width, el.height);
-            ctx.fillStyle = '#666';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(el.barcodeType, el.x + el.width/2, el.y + el.height/2);
+            // Draw barcode sample image if available
+            const img = barcodeImages[el.barcodeType];
+            if (img && img.complete) {
+                ctx.drawImage(img, el.x, el.y, el.width, el.height);
+            } else {
+                // Fallback to gray box with text
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(el.x, el.y, el.width, el.height);
+                ctx.strokeStyle = '#000';
+                ctx.strokeRect(el.x, el.y, el.width, el.height);
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(el.barcodeType, el.x + el.width/2, el.y + el.height/2);
+            }
         } else if (el.type === 'shape') {
             ctx.fillStyle = el.fillColor || '#000000';
             if (el.shape === 'square' || el.shape === 'rectangle') {
@@ -530,6 +607,7 @@ function showProperties(element) {
             <div class="mb-3">
                 <label class="form-label">Text Content</label>
                 <input type="text" class="form-control" id="propContent" value="${element.content}">
+                <small class="form-hint">Use variables like {{task_title}}, {{due_date}}, {{category}}, {{urgency}}, {{xp_value}}, {{timestamp}}, {{barcode}}, {{user_name}}, {{user_level}}</small>
             </div>
             <div class="mb-3">
                 <label class="form-label">Font Size</label>
@@ -666,7 +744,10 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     
     // Generate preview
     const preview = document.getElementById('receiptPreview');
-    preview.innerHTML = '<div style="text-align: center; padding: 20px;">Preview will render receipt based on canvas elements</div>';
+    const length = parseInt(document.getElementById('receiptLength').value || 300);
+    const heightPx = Math.round((length / 25.4) * 96);
+    preview.style.minHeight = heightPx + 'px';
+    preview.innerHTML = '<div style="text-align: center; padding: 20px;">Canvas preview with ' + elements.length + ' elements<br>Receipt length: ' + length + 'mm</div>';
     
     modal.show();
 });

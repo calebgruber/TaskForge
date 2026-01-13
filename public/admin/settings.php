@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 requireAdmin();
 
 $pageTitle = 'Settings';
@@ -7,6 +7,58 @@ $db = Database::getInstance();
 
 $message = '';
 $error = '';
+
+// Function to detect USB printers
+function detectUSBPrinters() {
+    $printers = [];
+    
+    // Check /dev/usb/ directory
+    if (is_dir('/dev/usb/')) {
+        $files = glob('/dev/usb/lp*');
+        foreach ($files as $file) {
+            if (is_writable($file)) {
+                $printers[] = [
+                    'path' => $file,
+                    'name' => basename($file),
+                    'type' => 'USB',
+                    'writable' => true
+                ];
+            }
+        }
+    }
+    
+    // Check /dev/ directory for direct LP devices
+    $files = glob('/dev/lp*');
+    foreach ($files as $file) {
+        if (is_writable($file)) {
+            $printers[] = [
+                'path' => $file,
+                'name' => basename($file),
+                'type' => 'USB/Parallel',
+                'writable' => true
+            ];
+        }
+    }
+    
+    // Try to use lpstat command to detect CUPS printers
+    if (function_exists('exec')) {
+        $output = [];
+        @exec('lpstat -p 2>&1', $output);
+        foreach ($output as $line) {
+            if (preg_match('/printer (.+?) /', $line, $matches)) {
+                $printerName = $matches[1];
+                $printers[] = [
+                    'path' => $printerName,
+                    'name' => $printerName,
+                    'type' => 'CUPS',
+                    'writable' => true
+                ];
+            }
+        }
+    }
+    
+    return $printers;
+}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,6 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Detect available printers
+$detectedPrinters = detectUSBPrinters();
+
 // Load current settings
 $settings = [
     'printer_enabled' => getSetting('printer_enabled', true),
@@ -55,7 +110,7 @@ $settings = [
     'reminder_check_interval' => getSetting('reminder_check_interval', 5),
 ];
 
-include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="page-body">
@@ -107,7 +162,25 @@ include __DIR__ . '/../includes/header.php';
                             
                             <div class="mb-3" id="usb-settings">
                                 <label class="form-label">USB Device Path</label>
-                                <input type="text" name="printer_device" class="form-control" value="<?php echo h($settings['printer_device']); ?>" placeholder="/dev/usb/lp0">
+                                <?php if (!empty($detectedPrinters)): ?>
+                                    <select name="printer_device" class="form-select" id="printerDeviceSelect">
+                                        <?php foreach ($detectedPrinters as $printer): ?>
+                                            <option value="<?php echo h($printer['path']); ?>" <?php echo $settings['printer_device'] === $printer['path'] ? 'selected' : ''; ?>>
+                                                <?php echo h($printer['name']); ?> - <?php echo h($printer['type']); ?> (<?php echo h($printer['path']); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                        <option value="custom">Custom path...</option>
+                                    </select>
+                                    <input type="text" name="printer_device_custom" class="form-control mt-2" id="customDevicePath" style="display: none;" placeholder="/dev/usb/lp0">
+                                    <small class="form-hint text-success">
+                                        <i class="ti ti-check"></i> <?php echo count($detectedPrinters); ?> printer(s) detected
+                                    </small>
+                                <?php else: ?>
+                                    <input type="text" name="printer_device" class="form-control" value="<?php echo h($settings['printer_device']); ?>" placeholder="/dev/usb/lp0">
+                                    <small class="form-hint text-warning">
+                                        <i class="ti ti-alert-triangle"></i> No printers auto-detected. Enter path manually or check connections.
+                                    </small>
+                                <?php endif; ?>
                                 <small class="form-hint">Common paths: /dev/usb/lp0, /dev/usb/lp1, or check with "ls /dev/usb/"</small>
                             </div>
                             
@@ -244,6 +317,31 @@ function togglePrinterSettings() {
 
 printerType.addEventListener('change', togglePrinterSettings);
 togglePrinterSettings(); // Initialize on page load
+
+// Handle custom device path
+const deviceSelect = document.getElementById('printerDeviceSelect');
+const customPathInput = document.getElementById('customDevicePath');
+
+if (deviceSelect && customPathInput) {
+    deviceSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customPathInput.style.display = 'block';
+            customPathInput.name = 'printer_device';
+            this.name = '';
+        } else {
+            customPathInput.style.display = 'none';
+            customPathInput.name = '';
+            this.name = 'printer_device';
+        }
+    });
+    
+    // Initialize on page load
+    if (deviceSelect.value === 'custom') {
+        customPathInput.style.display = 'block';
+        customPathInput.name = 'printer_device';
+        deviceSelect.name = '';
+    }
+}
 </script>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php include __DIR__ . '/../../includes/footer.php'; ?>

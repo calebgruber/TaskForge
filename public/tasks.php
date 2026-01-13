@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_task'])) {
             'reminder_frequency' => $_POST['reminder_frequency'] ?? 'once',
             'is_recurring' => isset($_POST['is_recurring']) ? 1 : 0,
             'recurrence_pattern' => $_POST['recurrence_pattern'] ?? null,
-            'template_id' => (int)$_POST['template_id'] ?: null
+            'template_id' => isset($_POST['template_id']) ? (int)$_POST['template_id'] : null
         ];
         
         $task = Task::create($user->getId(), $taskData);
