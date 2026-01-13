@@ -28,7 +28,7 @@ $stats['active_tasks'] = $db->fetchOne("SELECT COUNT(*) as count FROM tasks WHER
 $stats['completed_tasks'] = $userData['tasks_completed'] ?? 0;
 $stats['completed_today'] = $db->fetchOne("SELECT COUNT(*) as count FROM task_completions WHERE user_id = ? AND DATE(completed_at) = CURDATE()", [$_SESSION['user_id']])['count'] ?? 0;
 $stats['total_xp'] = $userData['total_xp'] ?? 0;
-$stats['pending_rewards'] = $db->fetchOne("SELECT COUNT(*) as count FROM rewards WHERE claimed_by_user_id IS NULL", [])['count'] ?? 0;
+$stats['pending_rewards'] = $db->fetchOne("SELECT COUNT(*) as count FROM rewards WHERE user_id = ? AND is_claimed = 0", [$_SESSION['user_id']])['count'] ?? 0;
 ?>
 
 <div class="tablet-container">

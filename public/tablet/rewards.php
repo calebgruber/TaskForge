@@ -18,7 +18,7 @@ $db = Database::getInstance();
 // Get rewards that have been claimed by this user
 $sql = "SELECT r.*
         FROM rewards r
-        WHERE r.claimed_by_user_id = ?
+        WHERE r.user_id = ? AND r.is_claimed = 1
         ORDER BY r.created_at DESC";
 $rewards = $db->fetchAll($sql, [$_SESSION['user_id']]);
 ?>
@@ -49,7 +49,7 @@ $rewards = $db->fetchAll($sql, [$_SESSION['user_id']]);
                             <i class="ti ti-trophy"></i>
                         </div>
                         <div style="flex: 1;">
-                            <h3 style="font-size: 28px; font-weight: 700; margin: 0 0 10px 0;"><?= htmlspecialchars($r['name']) ?></h3>
+                            <h3 style="font-size: 28px; font-weight: 700; margin: 0 0 10px 0;"><?= htmlspecialchars($r['title']) ?></h3>
                             <span style="background: #fef3c7; color: #92400e; padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: 600;">
                                 <?= ucfirst(str_replace('_', ' ', $r['reward_type'])) ?>
                             </span>
