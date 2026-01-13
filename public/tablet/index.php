@@ -16,11 +16,19 @@ $pageTitle = 'TaskForge Tablet Mode';
 require_once __DIR__ . '/header.php';
 
 $db = Database::getInstance();
-$user = new User($db);
-$userData = $user->get($_SESSION['user_id']);
+$user = new User($_SESSION['user_id']);
+$userData = $user->getData();
 
-// Get user stats
-$stats = $user->getStats($_SESSION['user_id']);
+// Get user progress
+$progress = $user->getProgressToNextLevel();
+
+// Get stats
+$stats = [
+    'completed_tasks' => $userData['tasks_completed'],
+    'pending_rewards' => $db->fetchOne("SELECT COUNT(*) as count FROM rewards WHERE user_id = ? AND is_claimed = 0", [$_SESSION['user_id']])['count'] ?? 0,
+    'streak' => 0, // TODO: Implement streak calculation
+    'goals_completed' => 0 // TODO: Implement goals calculation
+];
 ?>
 
 <div class="tablet-container">
@@ -32,16 +40,11 @@ $stats = $user->getStats($_SESSION['user_id']);
         <div class="user-info">
             <h1 class="user-name"><?= htmlspecialchars($userData['username']) ?></h1>
             <div class="user-level">
-                <span class="level-badge">Level <?= $userData['level'] ?></span>
-                <span class="xp-text"><?= number_format($userData['xp']) ?> XP</span>
+                <span class="level-badge">Level <?= $userData['current_level'] ?></span>
+                <span class="xp-text"><?= number_format($userData['current_xp']) ?> XP</span>
             </div>
             <div class="progress-bar-large">
-                <?php
-                $nextLevelXP = pow($userData['level'] + 1, 2) * 100;
-                $currentLevelXP = pow($userData['level'], 2) * 100;
-                $progress = (($userData['xp'] - $currentLevelXP) / ($nextLevelXP - $currentLevelXP)) * 100;
-                ?>
-                <div class="progress-fill" style="width: <?= min(100, max(0, $progress)) ?>%"></div>
+                <div class="progress-fill" style="width: <?= $progress['progress'] ?>%"></div>
             </div>
         </div>
     </div>

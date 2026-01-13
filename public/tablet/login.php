@@ -20,15 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password';
     } else {
-        $db = Database::getInstance();
-        $user = new User($db);
+        $user = User::authenticate($username, $password);
         
-        $userData = $user->authenticate($username, $password);
-        
-        if ($userData) {
-            $_SESSION['user_id'] = $userData['id'];
-            $_SESSION['username'] = $userData['username'];
-            $_SESSION['is_admin'] = $userData['is_admin'];
+        if ($user) {
+            $_SESSION['user_id'] = $user->getId();
+            $_SESSION['username'] = $user->get('username');
+            $_SESSION['is_admin'] = $user->get('is_admin');
             $_SESSION['tablet_mode'] = true;
             
             header('Location: index.php');
