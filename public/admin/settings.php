@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Printer settings
         setSetting('printer_enabled', isset($_POST['printer_enabled']) ? '1' : '0', 'bool');
         setSetting('printer_type', $_POST['printer_type'] ?? 'usb', 'string');
+        setSetting('printer_device', $_POST['printer_device'] ?? '/dev/usb/lp0', 'string');
         setSetting('printer_ip', $_POST['printer_ip'] ?? '', 'string');
         setSetting('printer_port', $_POST['printer_port'] ?? '9100', 'int');
         setSetting('auto_print_completion', isset($_POST['auto_print_completion']) ? '1' : '0', 'bool');
@@ -40,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $settings = [
     'printer_enabled' => getSetting('printer_enabled', true),
     'printer_type' => getSetting('printer_type', 'usb'),
+    'printer_device' => getSetting('printer_device', '/dev/usb/lp0'),
     'printer_ip' => getSetting('printer_ip', '192.168.1.100'),
     'printer_port' => getSetting('printer_port', 9100),
     'auto_print_completion' => getSetting('auto_print_completion', true),
@@ -97,10 +99,16 @@ include __DIR__ . '/../includes/header.php';
                             
                             <div class="mb-3">
                                 <label class="form-label">Connection Type</label>
-                                <select name="printer_type" class="form-select">
+                                <select name="printer_type" class="form-select" id="printerType">
                                     <option value="usb" <?php echo $settings['printer_type'] === 'usb' ? 'selected' : ''; ?>>USB</option>
                                     <option value="ethernet" <?php echo $settings['printer_type'] === 'ethernet' ? 'selected' : ''; ?>>Ethernet (Network)</option>
                                 </select>
+                            </div>
+                            
+                            <div class="mb-3" id="usb-settings">
+                                <label class="form-label">USB Device Path</label>
+                                <input type="text" name="printer_device" class="form-control" value="<?php echo h($settings['printer_device']); ?>" placeholder="/dev/usb/lp0">
+                                <small class="form-hint">Common paths: /dev/usb/lp0, /dev/usb/lp1, or check with "ls /dev/usb/"</small>
                             </div>
                             
                             <div class="mb-3" id="ethernet-settings">
@@ -214,5 +222,28 @@ include __DIR__ . '/../includes/header.php';
         </form>
     </div>
 </div>
+
+<script>
+// Toggle printer connection settings
+const printerType = document.getElementById('printerType');
+const usbSettings = document.getElementById('usb-settings');
+const ethernetSettings = document.getElementById('ethernet-settings');
+const ethernetPort = document.getElementById('ethernet-port');
+
+function togglePrinterSettings() {
+    if (printerType.value === 'usb') {
+        usbSettings.style.display = 'block';
+        ethernetSettings.style.display = 'none';
+        ethernetPort.style.display = 'none';
+    } else {
+        usbSettings.style.display = 'none';
+        ethernetSettings.style.display = 'block';
+        ethernetPort.style.display = 'block';
+    }
+}
+
+printerType.addEventListener('change', togglePrinterSettings);
+togglePrinterSettings(); // Initialize on page load
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

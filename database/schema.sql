@@ -60,7 +60,10 @@ CREATE TABLE IF NOT EXISTS receipt_templates (
     show_due_date TINYINT(1) DEFAULT 1,
     footer_text VARCHAR(255),
     text_alignment ENUM('left', 'center', 'right') DEFAULT 'left',
-    barcode_type ENUM('CODE128', 'CODE39', 'EAN13') DEFAULT 'CODE128',
+    barcode_type ENUM('CODE128', 'CODE39', 'EAN13', 'AZTEC', 'PDF417') DEFAULT 'CODE128',
+    receipt_length INT DEFAULT 300 COMMENT 'Receipt length in mm before cut',
+    is_advanced_template TINYINT(1) DEFAULT 0,
+    canvas_data TEXT COMMENT 'JSON data for advanced canvas-based template',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_type (template_type)
@@ -230,10 +233,33 @@ INSERT INTO xp_rules (rule_name, base_xp, urgency_multiplier, difficulty_multipl
 ('High Priority', 25, 1.50, 1.00),
 ('Critical', 50, 2.00, 1.00);
 
+-- Goals table for tracking user goals
+CREATE TABLE IF NOT EXISTS goals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    target_type ENUM('tasks', 'xp', 'days', 'streak') DEFAULT 'tasks',
+    target_value INT NOT NULL,
+    current_value INT DEFAULT 0,
+    category_id INT,
+    status ENUM('active', 'completed', 'archived') DEFAULT 'active',
+    reset_frequency ENUM('none', 'daily', 'weekly', 'monthly') DEFAULT 'none',
+    last_reset TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
+    INDEX idx_user (user_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Default system settings
 INSERT INTO settings (setting_key, setting_value, setting_type, description) VALUES
 ('printer_enabled', '1', 'bool', 'Enable thermal printer'),
 ('printer_type', 'usb', 'string', 'Printer connection type: usb or ethernet'),
+('printer_device', '/dev/usb/lp0', 'string', 'USB printer device path'),
 ('printer_ip', '192.168.1.100', 'string', 'Printer IP for ethernet connection'),
 ('printer_port', '9100', 'int', 'Printer port for ethernet connection'),
 ('scanner_enabled', '1', 'bool', 'Enable barcode scanner'),

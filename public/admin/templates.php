@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_template'])) {
         $sql = "INSERT INTO receipt_templates (
             name, template_type, header_text, footer_text, 
             show_timestamp, show_urgency, show_xp_value, show_category, show_due_date,
-            text_alignment, barcode_type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            text_alignment, barcode_type, receipt_length
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $db->execute($sql, [
             trim($_POST['name']),
@@ -28,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_template'])) {
             isset($_POST['show_category']) ? 1 : 0,
             isset($_POST['show_due_date']) ? 1 : 0,
             $_POST['text_alignment'],
-            $_POST['barcode_type']
+            $_POST['barcode_type'],
+            (int)($_POST['receipt_length'] ?? 300)
         ]);
         
         $message = 'Template created successfully!';
@@ -121,10 +122,19 @@ include __DIR__ . '/../includes/header.php';
                             <div class="mb-3">
                                 <label class="form-label">Barcode Type</label>
                                 <select name="barcode_type" class="form-select">
-                                    <option value="CODE128" selected>CODE128</option>
+                                    <option value="CODE128" selected>CODE128 (Standard)</option>
                                     <option value="CODE39">CODE39</option>
                                     <option value="EAN13">EAN13</option>
+                                    <option value="AZTEC">Aztec (2D)</option>
+                                    <option value="PDF417">PDF417 (2D)</option>
                                 </select>
+                                <small class="form-hint">CODE128 is recommended for standard receipts. Aztec and PDF417 are 2D barcodes for more data.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Receipt Length (mm)</label>
+                                <input type="number" name="receipt_length" class="form-control" value="300" min="100" max="500" placeholder="300">
+                                <small class="form-hint">Length of receipt before auto-cut. Typical range: 150-400mm</small>
                             </div>
                             
                             <div class="mb-3">

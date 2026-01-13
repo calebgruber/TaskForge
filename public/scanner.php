@@ -191,13 +191,15 @@ startCameraBtn.addEventListener('click', async () => {
         
         const config = {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
+            qrbox: { width: 300, height: 150 },  // Horizontal rectangle for CODE128
+            aspectRatio: 2.0,  // 2:1 aspect ratio for horizontal barcodes
             formatsToSupport: [
                 Html5QrcodeSupportedFormats.CODE_128,
                 Html5QrcodeSupportedFormats.CODE_39,
                 Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.QR_CODE
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.AZTEC,
+                Html5QrcodeSupportedFormats.PDF_417
             ]
         };
         

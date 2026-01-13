@@ -22,14 +22,16 @@ class Printer {
                 throw new Exception("Cannot connect to printer: $errstr ($errno)");
             }
         } else {
-            // USB connection
-            $device = PRINTER_DEVICE;
+            // USB connection - use device path from settings
+            $db = Database::getInstance();
+            $device = getSetting('printer_device', PRINTER_DEVICE);
+            
             if (!file_exists($device)) {
-                throw new Exception("Printer device not found: $device");
+                throw new Exception("Printer device not found: $device. Please configure in Settings.");
             }
             $this->connection = fopen($device, 'w');
             if (!$this->connection) {
-                throw new Exception("Cannot open printer device");
+                throw new Exception("Cannot open printer device: $device");
             }
         }
         
@@ -108,9 +110,9 @@ class Printer {
         $this->write($this->gs() . 'V' . chr($partial ? 1 : 0));
     }
     
-    public function printBarcode($data, $type = 'CODE128') {
+    public function printBarcode($data, $type = 'CODE128', $height = 50) {
         // Set barcode height
-        $this->write($this->gs() . 'h' . chr(50)); // 50 dots height
+        $this->write($this->gs() . 'h' . chr($height)); // Height in dots
         
         // Set barcode width
         $this->write($this->gs() . 'w' . chr(2)); // 2 dots width
@@ -122,15 +124,35 @@ class Printer {
         $barcodeTypes = [
             'CODE39' => 4,
             'CODE128' => 73,
-            'EAN13' => 67
+            'EAN13' => 67,
+            'AZTEC' => 75,    // GS1 DataBar stacked for Aztec-like
+            'PDF417' => 76    // PDF417 barcode
         ];
         
         $barcodeType = $barcodeTypes[$type] ?? 73;
         
-        // For CODE128
-        if ($type === 'CODE128') {
+        // Standard barcode printing for all types
+        if (in_array($type, ['CODE128', 'CODE39', 'EAN13'])) {
             $len = strlen($data);
             $this->write($this->gs() . 'k' . chr($barcodeType) . chr($len) . $data);
+        } elseif ($type === 'PDF417') {
+            // PDF417 2D barcode (ESC/POS command for PDF417)
+            // This is a simplified version - exact implementation depends on printer model
+            $this->write($this->gs() . '(k' . chr(3) . chr(0) . chr(48) . chr(80) . chr(48)); // Select PDF417
+            $len = strlen($data);
+            $lenL = $len % 256;
+            $lenH = floor($len / 256);
+            $this->write($this->gs() . '(k' . chr($lenL + 3) . chr($lenH) . chr(48) . chr(80) . chr(48) . $data);
+            $this->write($this->gs() . '(k' . chr(3) . chr(0) . chr(48) . chr(81) . chr(48)); // Print stored data
+        } elseif ($type === 'AZTEC') {
+            // Aztec 2D barcode (ESC/POS command for Aztec)
+            // Similar to PDF417, but with Aztec-specific commands
+            $this->write($this->gs() . '(k' . chr(3) . chr(0) . chr(48) . chr(90) . chr(48)); // Select Aztec
+            $len = strlen($data);
+            $lenL = $len % 256;
+            $lenH = floor($len / 256);
+            $this->write($this->gs() . '(k' . chr($lenL + 3) . chr($lenH) . chr(48) . chr(90) . chr(48) . $data);
+            $this->write($this->gs() . '(k' . chr(3) . chr(0) . chr(48) . chr(81) . chr(48)); // Print stored data
         }
     }
     
