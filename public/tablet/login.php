@@ -54,53 +54,131 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
-            background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
         }
         
-        .login-container {
+        .login-wrapper {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Left Side - Illustration */
+        .login-illustration {
+            flex: 1;
+            background: linear-gradient(135deg, #206bc4 0%, #1a5199 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-illustration::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+        
+        .illustration-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .illustration-icon {
+            font-size: 180px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2));
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .illustration-title {
+            font-size: 64px;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .illustration-subtitle {
+            font-size: 32px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        .illustration-features {
+            margin-top: 60px;
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+        }
+        
+        .feature-item i {
+            font-size: 36px;
+        }
+        
+        /* Right Side - Login Form */
+        .login-form-side {
+            flex: 1;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 40px;
+            padding: 60px;
         }
         
-        .login-card {
-            background: white;
-            border-radius: 24px;
-            padding: 80px 60px;
-            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
-            max-width: 600px;
+        .login-form-container {
             width: 100%;
+            max-width: 550px;
         }
         
-        .login-logo {
-            text-align: center;
+        .login-header {
             margin-bottom: 50px;
         }
         
-        .login-logo i {
-            font-size: 96px;
-            color: #206bc4;
-            margin-bottom: 20px;
-        }
-        
-        .login-logo h1 {
-            font-size: 48px;
+        .login-header h2 {
+            font-size: 42px;
             font-weight: 700;
             color: #1a202c;
-            margin: 0 0 10px 0;
+            margin: 0 0 15px 0;
         }
         
-        .login-logo p {
-            font-size: 24px;
+        .login-header p {
+            font-size: 22px;
             color: #64748b;
             margin: 0;
         }
@@ -110,16 +188,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .form-label-large {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             color: #1a202c;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: block;
         }
         
         .form-control-huge {
-            font-size: 24px;
-            padding: 24px;
+            font-size: 22px;
+            padding: 22px;
             border-radius: 12px;
             border: 2px solid #e2e8f0;
             width: 100%;
@@ -142,6 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: none;
             cursor: pointer;
             transition: all 0.3s;
+            margin-top: 10px;
         }
         
         .btn-primary-huge {
@@ -164,43 +243,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 30px;
             text-align: center;
         }
+        
+        .signup-section {
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .signup-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 0 0 20px 0;
+        }
+        
+        .signup-qr {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .signup-qr canvas {
+            display: block;
+        }
+        
+        .signup-text {
+            font-size: 18px;
+            color: #64748b;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <i class="ti ti-target"></i>
-                <h1>TaskForge</h1>
-                <p>Tablet Mode</p>
+    <div class="login-wrapper">
+        <!-- Left Side - Illustration -->
+        <div class="login-illustration">
+            <div class="illustration-content">
+                <div class="illustration-icon">
+                    <i class="ti ti-target"></i>
+                </div>
+                <h1 class="illustration-title">TaskForge</h1>
+                <p class="illustration-subtitle">Your Physical-Digital Productivity Hub</p>
+                
+                <div class="illustration-features">
+                    <div class="feature-item">
+                        <i class="ti ti-qrcode"></i>
+                        <span>Scan Tasks</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="ti ti-trophy"></i>
+                        <span>Earn XP</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="ti ti-printer"></i>
+                        <span>Print Receipts</span>
+                    </div>
+                </div>
             </div>
-            
-            <?php if ($error): ?>
-                <div class="error-message">
-                    <i class="ti ti-alert-circle"></i>
-                    <?= htmlspecialchars($error) ?>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST">
-                <div class="form-group-large">
-                    <label class="form-label-large">Username</label>
-                    <input type="text" name="username" class="form-control-huge" autofocus required>
+        </div>
+        
+        <!-- Right Side - Login Form -->
+        <div class="login-form-side">
+            <div class="login-form-container">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your TaskForge account</p>
                 </div>
                 
-                <div class="form-group-large">
-                    <label class="form-label-large">Password</label>
-                    <input type="password" name="password" class="form-control-huge" required>
-                </div>
+                <?php if ($error): ?>
+                    <div class="error-message">
+                        <i class="ti ti-alert-circle"></i>
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
                 
-                <button type="submit" class="btn-huge btn-primary-huge">
-                    <i class="ti ti-login"></i> Sign In
-                </button>
-            </form>
+                <form method="POST">
+                    <div class="form-group-large">
+                        <label class="form-label-large">Username</label>
+                        <input type="text" name="username" class="form-control-huge" autofocus required>
+                    </div>
+                    
+                    <div class="form-group-large">
+                        <label class="form-label-large">Password</label>
+                        <input type="password" name="password" class="form-control-huge" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-huge btn-primary-huge">
+                        <i class="ti ti-login"></i> Sign In
+                    </button>
+                </form>
+                
+                <div class="signup-section">
+                    <h3 class="signup-title">Need an Account?</h3>
+                    <div class="signup-qr" id="qrcode"></div>
+                    <p class="signup-text">Scan to sign up on the main website</p>
+                </div>
+            </div>
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
+        // Generate QR code for signup URL
+        const baseUrl = window.location.protocol + '//' + window.location.host;
+        const signupUrl = baseUrl.replace('/tablet', '') + '/register.php';
+        
+        new QRCode(document.getElementById("qrcode"), {
+            text: signupUrl,
+            width: 180,
+            height: 180,
+            colorDark: "#1a202c",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
         // Request fullscreen on load
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(() => {});
