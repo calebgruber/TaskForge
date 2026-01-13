@@ -48,6 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="tablet-container">
+    <div style="margin-bottom: 30px;">
+        <a href="index.php" class="btn-huge" style="background: #64748b; color: white; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 10px;">
+            <i class="ti ti-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    
     <h1 style="font-size: 48px; font-weight: 700; margin-bottom: 40px;">Create New Task</h1>
     
     <div class="tablet-card">

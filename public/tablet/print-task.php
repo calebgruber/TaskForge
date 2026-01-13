@@ -18,8 +18,8 @@ if (!$taskId) {
 }
 
 $db = Database::getInstance();
-$task = new Task($db);
-$taskData = $task->get($taskId);
+$task = new Task($taskId);
+$taskData = $task->getData();
 
 if (!$taskData || $taskData['user_id'] != $_SESSION['user_id']) {
     header('Location: tasks.php');
@@ -27,7 +27,7 @@ if (!$taskData || $taskData['user_id'] != $_SESSION['user_id']) {
 }
 
 // Print the task
-$printer = new Printer($db);
+$printer = new Printer();
 try {
     $printer->printTask($taskId);
     $success = true;

@@ -14,13 +14,23 @@ $pageTitle = 'My Tasks';
 require_once __DIR__ . '/header.php';
 
 $db = Database::getInstance();
-$task = new Task($db);
 
 // Get active tasks
-$tasks = $task->getUserTasks($_SESSION['user_id'], 'active');
+$sql = "SELECT t.*, c.name as category_name, c.color as category_color
+        FROM tasks t
+        LEFT JOIN categories c ON t.category_id = c.id
+        WHERE t.user_id = ? AND t.status = 'active'
+        ORDER BY t.due_date ASC, t.created_at DESC";
+$tasks = $db->fetchAll($sql, [$_SESSION['user_id']]);
 ?>
 
 <div class="tablet-container">
+    <div style="margin-bottom: 30px;">
+        <a href="index.php" class="btn-huge" style="background: #64748b; color: white; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 10px;">
+            <i class="ti ti-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
         <h1 style="font-size: 48px; font-weight: 700; margin: 0;">My Tasks</h1>
         <a href="create-task.php" class="btn-huge" style="background: #8b5cf6; color: white; text-decoration: none; border: none;">

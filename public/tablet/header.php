@@ -426,6 +426,10 @@ if (!isset($pageTitle)) {
             <span>TaskForge</span>
         </div>
         <div class="tablet-header-right">
+            <a href="../logout.php" class="exit-button" style="text-decoration: none; margin-right: 10px;">
+                <i class="ti ti-user-off"></i>
+                Logout
+            </a>
             <button class="exit-button" onclick="showExitModal()">
                 <i class="ti ti-logout"></i>
                 Exit Tablet Mode

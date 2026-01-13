@@ -14,18 +14,22 @@ $pageTitle = 'Rewards';
 require_once __DIR__ . '/header.php';
 
 $db = Database::getInstance();
-$stmt = $db->getConnection()->prepare("
-    SELECT r.*, ur.claimed_at, ur.id as user_reward_id
-    FROM rewards r
-    LEFT JOIN user_rewards ur ON r.id = ur.reward_id AND ur.user_id = ?
-    WHERE ur.id IS NOT NULL
-    ORDER BY ur.claimed_at DESC
-");
-$stmt->execute([$_SESSION['user_id']]);
-$rewards = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get rewards that have been claimed by this user
+$sql = "SELECT r.*
+        FROM rewards r
+        WHERE r.claimed_by_user_id = ?
+        ORDER BY r.created_at DESC";
+$rewards = $db->fetchAll($sql, [$_SESSION['user_id']]);
 ?>
 
 <div class="tablet-container">
+    <div style="margin-bottom: 30px;">
+        <a href="index.php" class="btn-huge" style="background: #64748b; color: white; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 10px;">
+            <i class="ti ti-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    
     <h1 style="font-size: 48px; font-weight: 700; margin-bottom: 40px;">
         <i class="ti ti-trophy" style="color: #f59e0b;"></i> My Rewards
     </h1>
