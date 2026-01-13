@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/classes/User.php';
 require_once __DIR__ . '/../includes/classes/Task.php';
 require_once __DIR__ . '/../includes/classes/Printer.php';
 
-requireAuth();
+requireLogin();
 requireAdmin();
 
 $pageTitle = 'Printer Management';
