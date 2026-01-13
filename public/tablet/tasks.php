@@ -13,7 +13,7 @@ if (!isLoggedIn()) {
 $pageTitle = 'My Tasks';
 require_once __DIR__ . '/header.php';
 
-$db = new Database();
+$db = Database::getInstance();
 $task = new Task($db);
 
 // Get active tasks

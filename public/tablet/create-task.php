@@ -13,7 +13,7 @@ if (!isLoggedIn()) {
 $pageTitle = 'Create Task';
 require_once __DIR__ . '/header.php';
 
-$db = new Database();
+$db = Database::getInstance();
 $success = false;
 $error = '';
 

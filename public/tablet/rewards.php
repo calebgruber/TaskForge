@@ -13,7 +13,7 @@ if (!isLoggedIn()) {
 $pageTitle = 'Rewards';
 require_once __DIR__ . '/header.php';
 
-$db = new Database();
+$db = Database::getInstance();
 $stmt = $db->getConnection()->prepare("
     SELECT r.*, ur.claimed_at, ur.id as user_reward_id
     FROM rewards r

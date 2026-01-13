@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password';
     } else {
-        $db = new Database();
+        $db = Database::getInstance();
         $user = new User($db);
         
         $userData = $user->authenticate($username, $password);

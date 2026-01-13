@@ -17,7 +17,7 @@ if (!$taskId) {
     exit;
 }
 
-$db = new Database();
+$db = Database::getInstance();
 $task = new Task($db);
 $taskData = $task->get($taskId);
 

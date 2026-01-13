@@ -15,7 +15,7 @@ if (!isLoggedIn()) {
 $pageTitle = 'TaskForge Tablet Mode';
 require_once __DIR__ . '/header.php';
 
-$db = new Database();
+$db = Database::getInstance();
 $user = new User($db);
 $userData = $user->get($_SESSION['user_id']);
 
