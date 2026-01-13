@@ -47,6 +47,7 @@ define('SESSION_LIFETIME', 86400); // 24 hours
 define('PASSWORD_MIN_LENGTH', 8);
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('INSTALL_PASSWORD', 'TaskForge2024!Install'); // Change this password!
+define('TABLET_EXIT_PIN', '1234'); // PIN to exit tablet/kiosk mode - Change this!
 
 // Printer Configuration
 define('PRINTER_ENABLED', true);

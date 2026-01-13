@@ -170,6 +170,10 @@
                                     <a class="dropdown-item" href="/admin/settings.php">
                                         <i class="ti ti-adjustments me-2"></i> Settings
                                     </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/tablet/login.php" target="_blank">
+                                        <i class="ti ti-device-tablet me-2"></i> Launch Tablet Mode
+                                    </a>
                                 </div>
                             </li>
                         </ul>
