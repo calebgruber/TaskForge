@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_template'])) {
             isset($_POST['show_due_date']) ? 1 : 0,
             $_POST['text_alignment'],
             $_POST['barcode_type'],
-            (int)($_POST['receipt_length'] ?? 300)
+            max(100, min(500, (int)($_POST['receipt_length'] ?? 300))) // Validate range
         ]);
         
         $message = 'Template created successfully!';

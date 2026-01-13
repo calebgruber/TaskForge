@@ -11,7 +11,25 @@ $error = '';
 // Handle template save
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_template'])) {
     try {
+        // Validate and sanitize canvas data
         $canvasData = json_decode($_POST['canvas_data'], true);
+        if (!is_array($canvasData)) {
+            throw new Exception('Invalid canvas data format');
+        }
+        
+        // Validate each element
+        $allowedTypes = ['text', 'barcode', 'shape', 'icon', 'image'];
+        foreach ($canvasData as $element) {
+            if (!isset($element['type']) || !in_array($element['type'], $allowedTypes)) {
+                throw new Exception('Invalid element type in canvas data');
+            }
+            // Sanitize text content
+            if ($element['type'] === 'text' && isset($element['content'])) {
+                $element['content'] = htmlspecialchars($element['content'], ENT_QUOTES, 'UTF-8');
+            }
+        }
+        
+        $receiptLength = max(100, min(500, (int)($_POST['receipt_length'] ?? 300)));
         
         $sql = "INSERT INTO receipt_templates (
             name, template_type, is_advanced_template, canvas_data, 
@@ -21,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_template'])) {
         $db->execute($sql, [
             trim($_POST['name']),
             $_POST['template_type'],
-            $_POST['canvas_data'],
-            (int)($_POST['receipt_length'] ?? 300),
+            json_encode($canvasData),
+            $receiptLength,
             $_POST['barcode_type']
         ]);
         

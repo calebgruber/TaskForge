@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS receipt_templates (
     footer_text VARCHAR(255),
     text_alignment ENUM('left', 'center', 'right') DEFAULT 'left',
     barcode_type ENUM('CODE128', 'CODE39', 'EAN13', 'AZTEC', 'PDF417') DEFAULT 'CODE128',
-    receipt_length INT DEFAULT 300 COMMENT 'Receipt length in mm before cut',
+    receipt_length INT DEFAULT 300 COMMENT 'Receipt length in mm before cut' CHECK (receipt_length >= 50 AND receipt_length <= 1000),
     is_advanced_template TINYINT(1) DEFAULT 0,
     canvas_data TEXT COMMENT 'JSON data for advanced canvas-based template',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
