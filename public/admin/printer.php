@@ -200,7 +200,9 @@ require_once __DIR__ . '/../includes/header.php';
                                     <div class="mb-3">
                                         <label class="form-label">Status</label>
                                         <div>
-                                            <?php if (PRINTER_ENABLED): ?>
+                                            <?php 
+                                            $printerEnabled = getSetting('printer_enabled', PRINTER_ENABLED);
+                                            if ($printerEnabled): ?>
                                                 <span class="badge bg-success">Enabled</span>
                                             <?php else: ?>
                                                 <span class="badge bg-danger">Disabled</span>
@@ -212,15 +214,16 @@ require_once __DIR__ . '/../includes/header.php';
                                     <div class="mb-3">
                                         <label class="form-label">Connection Type</label>
                                         <div>
+                                            <?php $printerType = getSetting('printer_type', PRINTER_TYPE); ?>
                                             <span class="badge bg-blue">
-                                                <?php echo strtoupper(PRINTER_TYPE); ?>
+                                                <?php echo strtoupper($printerType); ?>
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <?php if (PRINTER_TYPE === 'usb'): ?>
+                            <?php if ($printerType === 'usb'): ?>
                                 <div class="mb-3">
                                     <label class="form-label">Device Path</label>
                                     <div>
@@ -231,7 +234,27 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div class="mb-3">
                                     <label class="form-label">Network Address</label>
                                     <div>
-                                        <code><?php echo h(PRINTER_IP . ':' . PRINTER_PORT); ?></code>
+                                        <?php 
+                                        $printerIp = getSetting('printer_ip', PRINTER_IP);
+                                        $printerPort = getSetting('printer_port', PRINTER_PORT);
+                                        ?>
+                                        <code><?php echo h($printerIp . ':' . $printerPort); ?></code>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mb-3">
+                                    <div class="d-flex">
+                                        <div>
+                                            <i class="ti ti-info-circle me-2"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Network Printer Tips:</strong>
+                                            <ul class="mb-0 mt-1">
+                                                <li>Ensure printer is powered on and connected to network</li>
+                                                <li>Verify IP address hasn't changed (use static IP or DHCP reservation)</li>
+                                                <li>Port 9100 is standard for ESC/POS thermal printers</li>
+                                                <li>Test connectivity: <code>telnet <?php echo h($printerIp); ?> <?php echo h($printerPort); ?></code></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             <?php endif; ?>

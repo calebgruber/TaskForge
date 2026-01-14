@@ -12,18 +12,27 @@ class Printer {
     }
     
     public function connect() {
-        if (!PRINTER_ENABLED) {
+        $db = Database::getInstance();
+        $enabled = getSetting('printer_enabled', PRINTER_ENABLED);
+        
+        if (!$enabled) {
             throw new Exception("Printer is disabled");
         }
         
-        if ($this->type === 'ethernet') {
-            $this->connection = fsockopen(PRINTER_IP, PRINTER_PORT, $errno, $errstr, 10);
+        // Get printer type from settings
+        $printerType = getSetting('printer_type', $this->type);
+        
+        if ($printerType === 'ethernet') {
+            // Get network settings from database
+            $printerIp = getSetting('printer_ip', PRINTER_IP);
+            $printerPort = getSetting('printer_port', PRINTER_PORT);
+            
+            $this->connection = fsockopen($printerIp, $printerPort, $errno, $errstr, 10);
             if (!$this->connection) {
-                throw new Exception("Cannot connect to printer: $errstr ($errno)");
+                throw new Exception("Cannot connect to printer at $printerIp:$printerPort - $errstr ($errno)");
             }
         } else {
             // USB connection - use device path from settings
-            $db = Database::getInstance();
             $device = getSetting('printer_device', PRINTER_DEVICE);
             
             if (!file_exists($device)) {
@@ -40,11 +49,7 @@ class Printer {
     
     public function disconnect() {
         if ($this->connection) {
-            if ($this->type === 'ethernet') {
-                fclose($this->connection);
-            } else {
-                fclose($this->connection);
-            }
+            fclose($this->connection);
             $this->connection = null;
         }
     }
