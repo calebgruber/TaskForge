@@ -20,15 +20,7 @@ $db = Database::getInstance();
 $message = '';
 $error = '';
 
-// Handle browser print (new simple option)
-if (isset($_POST['print_browser'])) {
-    $taskId = isset($_POST['task_id']) ? (int)$_POST['task_id'] : null;
-    // Set flag to trigger browser print dialog
-    $showBrowserPrint = true;
-    $browserPrintTaskId = $taskId;
-}
-
-// Handle connection test
+// Handle browser print (removed - unused)
 if (isset($_POST['test_connection'])) {
     try {
         $printerType = getSetting('printer_type', PRINTER_TYPE);
@@ -547,7 +539,7 @@ require_once __DIR__ . '/../includes/header.php';
                                                                 <i class="ti ti-printer"></i>
                                                             </button>
                                                         </form>
-                                                        <button onclick="printTaskBrowser(<?php echo $task['id']; ?>, '<?php echo addslashes(htmlspecialchars($task['title'])); ?>')" class="btn btn-sm btn-outline-info" title="Print via Browser Dialog">
+                                                        <button onclick="printTaskBrowser(<?php echo $task['id']; ?>, <?php echo json_encode($task['title']); ?>)" class="btn btn-sm btn-outline-info" title="Print via Browser Dialog">
                                                             <i class="ti ti-device-desktop"></i>
                                                         </button>
                                                     </td>
@@ -571,12 +563,22 @@ require_once __DIR__ . '/../includes/header.php';
 <script>
 // Function to print task via browser dialog
 function printTaskBrowser(taskId, taskTitle) {
+    // Escape HTML to prevent XSS
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+    
+    const safeTitle = escapeHtml(taskTitle);
+    const barcodeText = 'TF' + String(taskId).padStart(8, '0');
+    
     // Create print content
     const printContent = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>TaskForge Receipt - ${taskTitle}</title>
+            <title>TaskForge Receipt - ${safeTitle}</title>
             <style>
                 @page { size: 80mm auto; margin: 5mm; }
                 body {
@@ -594,6 +596,9 @@ function printTaskBrowser(taskId, taskTitle) {
                     height: 60px;
                     margin: 10px 0;
                     text-align: center;
+                    font-family: 'Libre Barcode 128', monospace;
+                    font-size: 40px;
+                    letter-spacing: 2px;
                 }
                 hr { border: 0; border-top: 1px dashed #000; margin: 10px 0; }
             </style>
@@ -602,14 +607,13 @@ function printTaskBrowser(taskId, taskTitle) {
             <div class="center bold large">TaskForge</div>
             <div class="center">Task Receipt</div>
             <hr>
-            <div><strong>Task:</strong> ${taskTitle}</div>
+            <div><strong>Task:</strong> ${safeTitle}</div>
             <div><strong>Task ID:</strong> #${taskId}</div>
             <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
             <hr>
             <div class="center">Scan barcode to complete task:</div>
-            <div class="barcode">
-                <svg id="barcode-${taskId}"></svg>
-            </div>
+            <div class="center barcode">${barcodeText}</div>
+            <div class="center" style="font-size: 10px;">${barcodeText}</div>
             <hr>
             <div class="center">Thank you for using TaskForge!</div>
             <div class="center" style="margin-top: 20px;">✓</div>
