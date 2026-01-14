@@ -20,6 +20,36 @@ $db = Database::getInstance();
 $message = '';
 $error = '';
 
+// Handle connection test
+if (isset($_POST['test_connection'])) {
+    try {
+        $printerType = getSetting('printer_type', PRINTER_TYPE);
+        
+        if ($printerType === 'ethernet') {
+            $printerIp = getSetting('printer_ip', PRINTER_IP);
+            $printerPort = getSetting('printer_port', PRINTER_PORT);
+            
+            // Test network connection
+            $connection = @fsockopen($printerIp, $printerPort, $errno, $errstr, 5);
+            if ($connection) {
+                fclose($connection);
+                $message = "✓ Successfully connected to printer at $printerIp:$printerPort";
+            } else {
+                $error = "✗ Cannot connect to $printerIp:$printerPort - $errstr (Error $errno)";
+            }
+        } else {
+            $device = getSetting('printer_device', PRINTER_DEVICE);
+            if (file_exists($device)) {
+                $message = "✓ Printer device found at $device";
+            } else {
+                $error = "✗ Printer device not found at $device";
+            }
+        }
+    } catch (Exception $e) {
+        $error = "Connection test error: " . $e->getMessage();
+    }
+}
+
 // Handle test print
 if (isset($_POST['test_print'])) {
     try {
@@ -176,6 +206,10 @@ require_once __DIR__ . '/../includes/header.php';
                             </div>
                             
                             <form method="POST" class="mt-3">
+                                <button type="submit" name="test_connection" class="btn btn-info me-2">
+                                    <i class="ti ti-plug me-2"></i>
+                                    Test Connection
+                                </button>
                                 <button type="submit" name="test_print" class="btn btn-primary">
                                     <i class="ti ti-printer me-2"></i>
                                     Print Test Receipt
@@ -241,19 +275,41 @@ require_once __DIR__ . '/../includes/header.php';
                                         <code><?php echo h($printerIp . ':' . $printerPort); ?></code>
                                     </div>
                                 </div>
-                                <div class="alert alert-info mb-3">
+                                <div class="alert alert-warning mb-3">
                                     <div class="d-flex">
                                         <div>
-                                            <i class="ti ti-info-circle me-2"></i>
+                                            <i class="ti ti-alert-triangle me-2"></i>
                                         </div>
                                         <div>
-                                            <strong>Network Printer Tips:</strong>
-                                            <ul class="mb-0 mt-1">
-                                                <li>Ensure printer is powered on and connected to network</li>
-                                                <li>Verify IP address hasn't changed (use static IP or DHCP reservation)</li>
-                                                <li>Port 9100 is standard for ESC/POS thermal printers</li>
-                                                <li>Test connectivity: <code>telnet <?php echo h($printerIp); ?> <?php echo h($printerPort); ?></code></li>
-                                            </ul>
+                                            <strong>Network Connection Checklist:</strong>
+                                            <ol class="mb-0 mt-2">
+                                                <li><strong>Verify Settings:</strong> Go to <a href="/admin/settings.php">Admin → Settings</a> and confirm:
+                                                    <ul>
+                                                        <li>Connection Type is set to <strong>Ethernet (Network)</strong></li>
+                                                        <li>Printer IP: <code>192.168.1.210</code></li>
+                                                        <li>Printer Port: <code>9100</code></li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Test Connectivity:</strong> Click the <em>"Test Connection"</em> button above to verify network access</li>
+                                                <li><strong>Check Printer Status:</strong> Ensure printer is:
+                                                    <ul>
+                                                        <li>Powered on and connected to your network</li>
+                                                        <li>Has paper loaded</li>
+                                                        <li>Not showing error lights</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Firewall:</strong> Ensure your server can access port 9100 (ESC/POS standard port)</li>
+                                                <li><strong>Server Location:</strong> If your PHP server is on a different machine than your Windows PC:
+                                                    <ul>
+                                                        <li>The server needs network access to the printer</li>
+                                                        <li>The ping test you ran works from your PC, but the server needs access too</li>
+                                                    </ul>
+                                                </li>
+                                            </ol>
+                                            <div class="mt-2">
+                                                <strong>Command to test from server:</strong><br>
+                                                <code>telnet <?php echo h($printerIp); ?> <?php echo h($printerPort); ?></code>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

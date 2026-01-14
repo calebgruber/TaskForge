@@ -168,10 +168,7 @@
                                         <i class="ti ti-trophy me-2"></i> Rewards
                                     </a>
                                     <a class="dropdown-item" href="/admin/printer.php">
-                                        <i class="ti ti-printer me-2"></i> Printer (ESC/POS)
-                                    </a>
-                                    <a class="dropdown-item" href="/admin/jspm-printer.php">
-                                        <i class="ti ti-printer me-2"></i> Printer (JSPrintManager)
+                                        <i class="ti ti-printer me-2"></i> Printer Management
                                     </a>
                                     <a class="dropdown-item" href="/admin/settings.php">
                                         <i class="ti ti-adjustments me-2"></i> Settings
