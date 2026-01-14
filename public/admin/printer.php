@@ -99,13 +99,20 @@ if (isset($_POST['reprint_task'])) {
             throw new Exception("Task not found");
         }
         
-        $printer = new Printer();
-        $result = $printer->printTaskReceipt($task);
-        
-        if ($result) {
-            $message = "Task receipt reprinted successfully!";
+        if (Printer::useBrowserPrint()) {
+            // Store task ID for browser print
+            $_SESSION['print_task_id'] = $taskId;
+            $message = "Opening print dialog...";
         } else {
-            throw new Exception("Failed to reprint task");
+            // Direct ESC/POS printing
+            $printer = new Printer();
+            $result = $printer->printTaskReceipt($task);
+            
+            if ($result) {
+                $message = "Task receipt reprinted successfully!";
+            } else {
+                throw new Exception("Failed to reprint task");
+            }
         }
     } catch (Exception $e) {
         $error = "Reprint error: " . $e->getMessage();
@@ -641,3 +648,127 @@ function printTaskBrowser(taskId, taskTitle) {
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
+<?php if (isset($_SESSION['print_task_id'])): ?>
+<script>
+// Auto-trigger browser print dialog for task receipt
+(function() {
+    const taskId = <?php echo (int)$_SESSION['print_task_id']; ?>;
+    <?php unset($_SESSION['print_task_id']); ?>
+    
+    // Fetch task data and generate receipt
+    fetch('/api/get-task.php?id=' + taskId)
+        .then(response => response.json())
+        .then(task => {
+            if (task && task.id) {
+                // Generate receipt HTML using template
+                printTaskReceipt(task);
+            }
+        })
+        .catch(error => console.error('Error loading task:', error));
+})();
+
+function printTaskReceipt(task) {
+    const receiptHtml = generateReceiptHtml(task);
+    
+    // Create hidden iframe for printing
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Task Receipt</title>
+            <style>
+                @page { size: 80mm auto; margin: 0; }
+                body { margin: 0; padding: 0; font-family: monospace; }
+                .thermal-receipt { width: 80mm; padding: 5mm; }
+                @media print {
+                    body { margin: 0; }
+                }
+            </style>
+        </head>
+        <body onload="window.print(); setTimeout(() => parent.document.body.removeChild(parent.document.querySelector('iframe')), 1000);">
+            ${receiptHtml}
+        </body>
+        </html>
+    `);
+    doc.close();
+}
+
+function generateReceiptHtml(task) {
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+    
+    let html = '<div class="thermal-receipt">';
+    
+    // Header
+    html += '<div style="text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 10px;">';
+    html += 'TaskForge';
+    html += '</div>';
+    
+    // Task title
+    html += '<div style="text-align: center; font-weight: bold; font-size: 16px; margin: 10px 0;">';
+    html += escapeHtml(task.title);
+    html += '</div>';
+    
+    html += '<div style="border-top: 2px dashed #000; margin: 10px 0;"></div>';
+    
+    // Details
+    if (task.category_name) {
+        html += '<div><strong>Category:</strong> ' + escapeHtml(task.category_name) + '</div>';
+    }
+    
+    const urgencyLabels = {
+        'low': 'Low',
+        'normal': 'Normal',
+        'high': 'HIGH',
+        'critical': '!!! CRITICAL !!!'
+    };
+    html += '<div><strong>Urgency:</strong> ' + (urgencyLabels[task.urgency_level] || 'Normal') + '</div>';
+    
+    if (task.xp_value) {
+        html += '<div><strong>XP Reward:</strong> ' + task.xp_value + ' XP</div>';
+    }
+    
+    if (task.due_date) {
+        const dueDate = new Date(task.due_date);
+        html += '<div><strong>Due:</strong> ' + dueDate.toLocaleString() + '</div>';
+    }
+    
+    if (task.description) {
+        html += '<div style="margin-top: 10px;"><strong>Description:</strong></div>';
+        html += '<div style="white-space: pre-wrap;">' + escapeHtml(task.description) + '</div>';
+    }
+    
+    html += '<div style="margin-top: 10px;"><strong>Printed:</strong> ' + new Date().toLocaleString() + '</div>';
+    
+    html += '<div style="border-top: 2px dashed #000; margin: 10px 0;"></div>';
+    
+    // Barcode
+    html += '<div style="text-align: center; margin: 15px 0;">';
+    html += '<div style="font-size: 12px; margin-bottom: 5px;">Scan to complete:</div>';
+    const barcodeData = 'TF' + String(task.id).padStart(8, '0');
+    html += '<div style="font-family: monospace; font-size: 24px; font-weight: bold; letter-spacing: 2px;">';
+    html += barcodeData;
+    html += '</div>';
+    html += '<div style="font-size: 11px; margin-top: 5px;">' + barcodeData + '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    return html;
+}
+</script>
+<?php endif; ?>

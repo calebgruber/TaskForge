@@ -174,6 +174,118 @@ class Printer {
         return true;
     }
     
+    /**
+     * Get print method from settings
+     */
+    public static function getPrintMethod() {
+        return getSetting('printer_method', 'browser');
+    }
+    
+    /**
+     * Check if should use browser print dialog
+     */
+    public static function useBrowserPrint() {
+        return self::getPrintMethod() === 'browser';
+    }
+    
+    /**
+     * Generate browser-friendly HTML receipt using templates
+     */
+    public static function generateHtmlReceipt(Task $task, $template = null) {
+        $db = Database::getInstance();
+        
+        // Get template
+        if (!$template) {
+            if ($task->get('template_id')) {
+                $template = $db->fetchOne(
+                    "SELECT * FROM receipt_templates WHERE id = ?",
+                    [$task->get('template_id')]
+                );
+            } else {
+                $template = $db->fetchOne(
+                    "SELECT * FROM receipt_templates WHERE template_type = 'task' LIMIT 1"
+                );
+            }
+        }
+        
+        // Generate HTML receipt
+        $html = '<div class="thermal-receipt" style="width: 80mm; font-family: monospace; padding: 10mm;">';
+        
+        // Header
+        if ($template && $template['header_text']) {
+            $align = $template['text_alignment'] ?? 'center';
+            $html .= '<div style="text-align: ' . h($align) . '; font-weight: bold; font-size: 18px; margin-bottom: 10px;">';
+            $html .= h($template['header_text']);
+            $html .= '</div>';
+        }
+        
+        // Task title
+        $html .= '<div style="text-align: center; font-weight: bold; font-size: 16px; margin: 10px 0;">';
+        $html .= h($task->get('title'));
+        $html .= '</div>';
+        
+        $html .= '<div style="border-top: 2px dashed #000; margin: 10px 0;"></div>';
+        
+        // Details
+        if ($template && $template['show_category'] && $task->get('category_name')) {
+            $html .= '<div><strong>Category:</strong> ' . h($task->get('category_name')) . '</div>';
+        }
+        
+        if ($template && $template['show_urgency']) {
+            $urgencyLabels = [
+                'low' => 'Low',
+                'normal' => 'Normal',
+                'high' => 'HIGH',
+                'critical' => '!!! CRITICAL !!!'
+            ];
+            $urgency = $urgencyLabels[$task->get('urgency_level')] ?? 'Normal';
+            $html .= '<div><strong>Urgency:</strong> ' . h($urgency) . '</div>';
+        }
+        
+        if ($template && $template['show_xp_value']) {
+            $html .= '<div><strong>XP Reward:</strong> ' . h($task->get('xp_value')) . ' XP</div>';
+        }
+        
+        if ($template && $template['show_due_date'] && $task->get('due_date')) {
+            $dueDate = date('M d, Y h:i A', strtotime($task->get('due_date')));
+            $html .= '<div><strong>Due:</strong> ' . h($dueDate) . '</div>';
+        }
+        
+        if ($task->get('description')) {
+            $html .= '<div style="margin-top: 10px;"><strong>Description:</strong></div>';
+            $html .= '<div style="white-space: pre-wrap;">' . h($task->get('description')) . '</div>';
+        }
+        
+        if ($template && $template['show_timestamp']) {
+            $html .= '<div style="margin-top: 10px;"><strong>Printed:</strong> ' . date('M d, Y h:i A') . '</div>';
+        }
+        
+        $html .= '<div style="border-top: 2px dashed #000; margin: 10px 0;"></div>';
+        
+        // Barcode
+        $html .= '<div style="text-align: center; margin: 15px 0;">';
+        $html .= '<div style="font-size: 12px; margin-bottom: 5px;">Scan to complete:</div>';
+        $barcodeData = 'TF' . str_pad($task->getId(), 8, '0', STR_PAD_LEFT);
+        $html .= '<div style="font-family: \'Libre Barcode 128\', monospace; font-size: 48px; letter-spacing: 0;">';
+        $html .= h($barcodeData);
+        $html .= '</div>';
+        $html .= '<div style="font-size: 11px; margin-top: 5px;">' . h($barcodeData) . '</div>';
+        $html .= '</div>';
+        
+        // Footer
+        if ($template && $template['footer_text']) {
+            $html .= '<div style="border-top: 2px dashed #000; margin: 10px 0;"></div>';
+            $align = $template['text_alignment'] ?? 'center';
+            $html .= '<div style="text-align: ' . h($align) . '; font-size: 12px;">';
+            $html .= h($template['footer_text']);
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>';
+        
+        return $html;
+    }
+    
     public function printTaskReceipt(Task $task, $template = null) {
         try {
             $this->connect();
