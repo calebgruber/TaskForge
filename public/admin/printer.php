@@ -20,6 +20,14 @@ $db = Database::getInstance();
 $message = '';
 $error = '';
 
+// Handle browser print (new simple option)
+if (isset($_POST['print_browser'])) {
+    $taskId = isset($_POST['task_id']) ? (int)$_POST['task_id'] : null;
+    // Set flag to trigger browser print dialog
+    $showBrowserPrint = true;
+    $browserPrintTaskId = $taskId;
+}
+
 // Handle connection test
 if (isset($_POST['test_connection'])) {
     try {
@@ -180,7 +188,36 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             <?php endif; ?>
             
-            <div class="row row-cards">
+            <!-- Printing Methods Info -->
+            <div class="alert alert-azure">
+                <div class="d-flex">
+                    <div>
+                        <i class="ti ti-info-circle me-2"></i>
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Two Printing Methods Available</h4>
+                        <div class="text-muted">
+                            <p class="mb-2"><strong>1. ESC/POS Direct Printing</strong> (Printer icon <i class="ti ti-printer"></i>):</p>
+                            <ul class="mb-2">
+                                <li>Server-side printing with ESC/POS commands</li>
+                                <li>Works with network printers or USB printers on Linux/Mac servers</li>
+                                <li>No browser dialog - prints directly to configured printer</li>
+                                <li>Best for kiosk deployments</li>
+                            </ul>
+                            
+                            <p class="mb-2"><strong>2. Browser Print Dialog</strong> (Desktop icon <i class="ti ti-device-desktop"></i>):</p>
+                            <ul class="mb-0">
+                                <li>Client-side printing through your browser</li>
+                                <li><strong>✓ Works with USB printers on Windows!</strong></li>
+                                <li>Shows browser print dialog - select your printer</li>
+                                <li>Perfect for USB-connected thermal printers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row row-cards"
                 <!-- Test Print Section -->
                 <div class="col-md-6">
                     <div class="card">
@@ -262,6 +299,27 @@ require_once __DIR__ . '/../includes/header.php';
                                     <label class="form-label">Device Path</label>
                                     <div>
                                         <code><?php echo h(getSetting('printer_device', PRINTER_DEVICE)); ?></code>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <div class="d-flex">
+                                        <div>
+                                            <i class="ti ti-usb me-2"></i>
+                                        </div>
+                                        <div>
+                                            <strong>USB Connection Guide:</strong>
+                                            <ol class="mb-0 mt-2">
+                                                <li><strong>Windows:</strong> USB printers typically don't work with direct device paths. Use the <strong>Browser Print option</strong> instead (blue button next to each task).</li>
+                                                <li><strong>Linux/Mac:</strong> Find device path:
+                                                    <ul>
+                                                        <li><code>/dev/usb/lp0</code> or <code>/dev/lp0</code></li>
+                                                        <li>Run: <code>ls -l /dev/usb/lp*</code></li>
+                                                        <li>Ensure web server has write permission</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Configure:</strong> Go to <a href="/admin/settings.php">Settings</a> and update device path</li>
+                                            </ol>
+                                        </div>
                                     </div>
                                 </div>
                             <?php else: ?>
@@ -483,12 +541,15 @@ require_once __DIR__ . '/../includes/header.php';
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <form method="POST" style="display:inline;">
+                                                        <form method="POST" style="display:inline;" class="me-1">
                                                             <input type="hidden" name="task_id" value="<?php echo $task['id']; ?>">
-                                                            <button type="submit" name="reprint_task" class="btn btn-sm btn-outline-primary" title="Print Receipt">
+                                                            <button type="submit" name="reprint_task" class="btn btn-sm btn-outline-primary" title="Print via ESC/POS">
                                                                 <i class="ti ti-printer"></i>
                                                             </button>
                                                         </form>
+                                                        <button onclick="printTaskBrowser(<?php echo $task['id']; ?>, '<?php echo addslashes(htmlspecialchars($task['title'])); ?>')" class="btn btn-sm btn-outline-info" title="Print via Browser Dialog">
+                                                            <i class="ti ti-device-desktop"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -503,5 +564,76 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
+
+<!-- Browser Print Dialog Support -->
+<div id="printFrame" style="display: none;"></div>
+
+<script>
+// Function to print task via browser dialog
+function printTaskBrowser(taskId, taskTitle) {
+    // Create print content
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>TaskForge Receipt - ${taskTitle}</title>
+            <style>
+                @page { size: 80mm auto; margin: 5mm; }
+                body {
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    line-height: 1.4;
+                    margin: 0;
+                    padding: 10px;
+                    width: 70mm;
+                }
+                .center { text-align: center; }
+                .bold { font-weight: bold; }
+                .large { font-size: 18px; }
+                .barcode { 
+                    height: 60px;
+                    margin: 10px 0;
+                    text-align: center;
+                }
+                hr { border: 0; border-top: 1px dashed #000; margin: 10px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="center bold large">TaskForge</div>
+            <div class="center">Task Receipt</div>
+            <hr>
+            <div><strong>Task:</strong> ${taskTitle}</div>
+            <div><strong>Task ID:</strong> #${taskId}</div>
+            <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
+            <hr>
+            <div class="center">Scan barcode to complete task:</div>
+            <div class="barcode">
+                <svg id="barcode-${taskId}"></svg>
+            </div>
+            <hr>
+            <div class="center">Thank you for using TaskForge!</div>
+            <div class="center" style="margin-top: 20px;">✓</div>
+        </body>
+        </html>
+    `;
+    
+    // Create iframe for printing
+    const printFrame = document.getElementById('printFrame');
+    printFrame.innerHTML = '<iframe id="printIframe" style="width:100%;height:100%;"></iframe>';
+    const iframe = document.getElementById('printIframe');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(printContent);
+    iframeDoc.close();
+    
+    // Wait for content to load, then print
+    iframe.onload = function() {
+        setTimeout(function() {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 500);
+    };
+}
+</script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
