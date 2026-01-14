@@ -65,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Printer settings
         setSetting('printer_enabled', isset($_POST['printer_enabled']) ? '1' : '0', 'bool');
+        setSetting('printer_method', $_POST['printer_method'] ?? 'browser', 'string');
         setSetting('printer_type', $_POST['printer_type'] ?? 'usb', 'string');
         setSetting('printer_device', $_POST['printer_device'] ?? '/dev/usb/lp0', 'string');
         setSetting('printer_ip', $_POST['printer_ip'] ?? '', 'string');
@@ -95,6 +96,7 @@ $detectedPrinters = detectUSBPrinters();
 // Load current settings
 $settings = [
     'printer_enabled' => getSetting('printer_enabled', true),
+    'printer_method' => getSetting('printer_method', 'browser'),
     'printer_type' => getSetting('printer_type', 'usb'),
     'printer_device' => getSetting('printer_device', '/dev/usb/lp0'),
     'printer_ip' => getSetting('printer_ip', '192.168.1.100'),
@@ -153,6 +155,19 @@ include __DIR__ . '/../includes/header.php';
                             </div>
                             
                             <div class="mb-3">
+                                <label class="form-label">Print Method</label>
+                                <select name="printer_method" class="form-select" id="printerMethod">
+                                    <option value="browser" <?php echo $settings['printer_method'] === 'browser' ? 'selected' : ''; ?>>Browser Print Dialog (Recommended for USB)</option>
+                                    <option value="direct" <?php echo $settings['printer_method'] === 'direct' ? 'selected' : ''; ?>>Direct ESC/POS (For Network Printers)</option>
+                                </select>
+                                <small class="form-hint">
+                                    <strong>Browser Print Dialog:</strong> Works with any printer (USB, network, etc.). Shows standard Windows/Mac print dialog.<br>
+                                    <strong>Direct ESC/POS:</strong> Silent printing for network-accessible thermal printers. Requires server access to printer.
+                                </small>
+                            </div>
+                            
+                            <div id="direct-printer-settings">
+                            <div class="mb-3">
                                 <label class="form-label">Connection Type</label>
                                 <select name="printer_type" class="form-select" id="printerType">
                                     <option value="usb" <?php echo $settings['printer_type'] === 'usb' ? 'selected' : ''; ?>>USB</option>
@@ -199,6 +214,7 @@ include __DIR__ . '/../includes/header.php';
                                     <input type="checkbox" name="auto_print_completion" class="form-check-input" value="1" <?php echo $settings['auto_print_completion'] ? 'checked' : ''; ?>>
                                     <span class="form-check-label">Auto-print completion receipts</span>
                                 </label>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -297,11 +313,22 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
-// Toggle printer connection settings
+// Toggle printer method and connection settings
+const printerMethod = document.getElementById('printerMethod');
+const directPrinterSettings = document.getElementById('direct-printer-settings');
 const printerType = document.getElementById('printerType');
 const usbSettings = document.getElementById('usb-settings');
 const ethernetSettings = document.getElementById('ethernet-settings');
 const ethernetPort = document.getElementById('ethernet-port');
+
+function togglePrinterMethod() {
+    if (printerMethod.value === 'browser') {
+        directPrinterSettings.style.display = 'none';
+    } else {
+        directPrinterSettings.style.display = 'block';
+        togglePrinterSettings(); // Also update connection type visibility
+    }
+}
 
 function togglePrinterSettings() {
     if (printerType.value === 'usb') {
@@ -315,7 +342,9 @@ function togglePrinterSettings() {
     }
 }
 
+printerMethod.addEventListener('change', togglePrinterMethod);
 printerType.addEventListener('change', togglePrinterSettings);
+togglePrinterMethod(); // Initialize on page load
 togglePrinterSettings(); // Initialize on page load
 
 // Handle custom device path
