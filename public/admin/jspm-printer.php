@@ -89,7 +89,7 @@ include __DIR__ . '/../includes/header.php';
 
 <!-- JSPrintManager Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/JSPrintManager/4.0.0/JSPrintManager.js"></script>
+<script src="https://cdn.neodynamic.com/jspm/5.0.0/JSPrintManager.js"></script>
 
 <div class="container-xl">
     <div class="page-header d-print-none">
@@ -260,26 +260,37 @@ include __DIR__ . '/../includes/header.php';
     
     let selectedPrinter = null;
     
-    // Initialize JSPrintManager
-    JSPM.JSPrintManager.auto_reconnect = true;
-    JSPM.JSPrintManager.start();
-    
-    JSPM.JSPrintManager.WS.onStatusChanged = function() {
-        if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open) {
-            document.getElementById('jspm-status').className = 'jspm-status connected';
-            document.getElementById('jspm-status').innerHTML = '<strong>✓ Connected to JSPrintManager</strong><div class="mt-2">Client-side printing is available.</div>';
-            document.getElementById('printer-selection').style.display = 'block';
-            refreshPrinters();
-        } else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
-            document.getElementById('jspm-status').className = 'jspm-status disconnected';
-            document.getElementById('jspm-status').innerHTML = '<strong>✗ JSPrintManager Not Connected</strong><div class="mt-2">Please install and run JSPrintManager Client.</div>';
-            document.getElementById('printer-selection').style.display = 'none';
-        } else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
-            document.getElementById('jspm-status').className = 'jspm-status disconnected';
-            document.getElementById('jspm-status').innerHTML = '<strong>✗ JSPrintManager Blocked</strong><div class="mt-2">Please allow the connection in your browser.</div>';
-            document.getElementById('printer-selection').style.display = 'none';
+    // Wait for JSPrintManager library to load
+    function initializeJSPM() {
+        if (typeof JSPM === 'undefined') {
+            setTimeout(initializeJSPM, 100);
+            return;
         }
-    };
+        
+        // Initialize JSPrintManager
+        JSPM.JSPrintManager.auto_reconnect = true;
+        JSPM.JSPrintManager.start();
+        
+        JSPM.JSPrintManager.WS.onStatusChanged = function() {
+            if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open) {
+                document.getElementById('jspm-status').className = 'jspm-status connected';
+                document.getElementById('jspm-status').innerHTML = '<strong>✓ Connected to JSPrintManager</strong><div class="mt-2">Client-side printing is available.</div>';
+                document.getElementById('printer-selection').style.display = 'block';
+                refreshPrinters();
+            } else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
+                document.getElementById('jspm-status').className = 'jspm-status disconnected';
+                document.getElementById('jspm-status').innerHTML = '<strong>✗ JSPrintManager Not Connected</strong><div class="mt-2">Please install and run JSPrintManager Client.</div>';
+                document.getElementById('printer-selection').style.display = 'none';
+            } else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
+                document.getElementById('jspm-status').className = 'jspm-status disconnected';
+                document.getElementById('jspm-status').innerHTML = '<strong>✗ JSPrintManager Blocked</strong><div class="mt-2">Please allow the connection in your browser.</div>';
+                document.getElementById('printer-selection').style.display = 'none';
+            }
+        };
+    }
+    
+    // Start initialization when page loads
+    window.addEventListener('load', initializeJSPM);
     
     // Refresh printer list
     function refreshPrinters() {
